@@ -1,0 +1,272 @@
+{% extends base_template %}
+
+{% block title %}PikMatrix | User Profile & Preferences{% endblock %}
+
+{% block content %}
+<div class="profile-page-container" style="max-width: 860px; margin: 0 auto; padding-bottom: 110px;">
+
+    <!-- Breadcrumb: Back to Matches -->
+    <div class="mb-3">
+        <a href="/matches"
+           hx-get="/matches"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="btn-breadcrumb-back m-0">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Matches</span>
+        </a>
+    </div>
+
+    <!-- Header Card -->
+    <div class="terminal-header-card mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-avatar-large" style="width: 58px; height: 58px; border-radius: 50%; background: linear-gradient(135deg, var(--accent-blue) 0%, #174eb8 100%); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; font-weight: 800; font-family: var(--font-mono, monospace); color: #ffffff; border: 2px solid rgba(255, 255, 255, 0.15); box-shadow: 0 4px 14px rgba(35, 114, 245, 0.35);">
+                    {{ user_initials or 'AE' }}
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h4 class="m-0 fw-bold text-white">{{ display_name or 'Amfo Ebenezer' }}</h4>
+                        <span class="badge border" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; border-color: rgba(46, 240, 104, 0.4); font-size: 0.70rem; font-weight: 800; padding: 4px 8px; letter-spacing: 0.5px;">
+                            <i class="bi bi-patch-check-fill me-1"></i> PRO VERIFIED
+                        </span>
+                    </div>
+                    <div class="small text-secondary mt-1">
+                        <span>{{ display_email or (current_user.email if current_user else 'amfo.ebenezer@pikmatrix.com') }}</span>
+                        • <span class="mono" style="color: var(--text-muted);">ID: #PKM-8829</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Logout button -->
+            <form action="/api/logout" method="POST" class="m-0" hx-post="/api/logout" hx-target="body">
+                <button type="submit" class="btn-logout-pill px-3 py-2" style="height: auto;" title="Sign out">
+                    <i class="bi bi-box-arrow-right me-1"></i>
+                    <span>Sign Out</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <!-- 1. Account Overview Card -->
+        <div class="col-md-6">
+            <div class="terminal-header-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle) !important;">
+                    <div class="fw-bold text-white" style="font-size: 0.95rem;">
+                        <i class="bi bi-person-badge-fill me-2" style="color: var(--accent-blue);"></i> Account Overview
+                    </div>
+                    <span class="badge" style="background: rgba(35, 114, 245, 0.12); color: var(--accent-blue); font-size: 0.68rem; font-weight: 700;">
+                        ACTIVE
+                    </span>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <div class="small text-secondary mb-1">Full Legal Name</div>
+                        <div class="text-white fw-semibold">{{ display_name or 'Amfo Ebenezer' }}</div>
+                    </div>
+                    <div>
+                        <div class="small text-secondary mb-1">Primary Email</div>
+                        <div class="text-white fw-semibold mono">{{ display_email or (current_user.email if current_user else 'amfo.ebenezer@pikmatrix.com') }}</div>
+                    </div>
+                    <div>
+                        <div class="small text-secondary mb-1">Trader Level & Badge</div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge border" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; border-color: rgba(46, 240, 104, 0.4); font-size: 0.72rem; font-weight: 800;">
+                                <i class="bi bi-shield-check me-1"></i> PRO VERIFIED
+                            </span>
+                            <span class="small text-secondary">• Capital Tier: $10,000 Allocation</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="small text-secondary mb-1">Account Security</div>
+                        <div class="small text-muted">
+                            <i class="bi bi-lock-fill text-success me-1"></i> 256-bit Encrypted Session Active
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Subscription Management Card -->
+        <div class="col-md-6">
+            <div class="terminal-header-card h-100">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle) !important;">
+                    <div class="fw-bold text-white" style="font-size: 0.95rem;">
+                        <i class="bi bi-credit-card-2-front-fill me-2" style="color: #2EF068;"></i> Subscription Management
+                    </div>
+                    <span class="badge" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; font-size: 0.68rem; font-weight: 800;">
+                        ANNUAL PLAN
+                    </span>
+                </div>
+
+                <div class="d-flex flex-column gap-3">
+                    <div>
+                        <div class="small text-secondary mb-1">Active Tier</div>
+                        <div class="d-flex align-items-center justify-content-between">
+                            <span class="text-white fw-bold fs-6">PikMatrix Quant VIP + Autonomous Engine</span>
+                            <span class="badge border mono" style="background: var(--bg-surface-elevated); color: var(--accent-blue); border-color: var(--border-subtle);">$99 / mo</span>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="small text-secondary mb-1">Next Billing Date</div>
+                        <div class="text-white fw-semibold mono">November 15, 2026 • Auto-renews</div>
+                    </div>
+                    <div>
+                        <div class="small text-secondary mb-1">Included Model Feeds</div>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            <span class="badge border" style="background: var(--bg-page); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.70rem;">Football 7-Category Model</span>
+                            <span class="badge border" style="background: var(--bg-page); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.70rem;">Basketball 6-Category Model</span>
+                            <span class="badge border" style="background: var(--bg-page); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.70rem;">Tennis 9-Category Model</span>
+                        </div>
+                    </div>
+                    <div class="pt-2">
+                        <button class="btn btn-sm btn-outline-secondary w-100" style="font-size: 0.78rem;">
+                            <i class="bi bi-receipt me-1"></i> Manage Invoices & Billing Portal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Application Preferences Card -->
+        <div class="col-12">
+            <div class="terminal-header-card">
+                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle) !important;">
+                    <div class="fw-bold text-white" style="font-size: 0.95rem;">
+                        <i class="bi bi-gear-fill me-2" style="color: var(--accent-blue);"></i> Application Preferences
+                    </div>
+                    <span class="small text-secondary">Customized for Amfo Ebenezer</span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Odds Format</label>
+                        <div class="custom-select-wrapper position-relative">
+                            <input type="hidden" id="prefOddsFormat" value="decimal">
+                            <button type="button"
+                                    class="custom-select-trigger"
+                                    role="combobox"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    aria-controls="prefOddsFormatList">
+                                <span class="custom-select-label">Decimal (e.g. 1.85, 2.10)</span>
+                                <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                            </button>
+                            <div class="custom-select-popover" id="prefOddsFormatList" role="listbox">
+                                <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="decimal" data-label="Decimal (e.g. 1.85, 2.10)">
+                                    <span>Decimal (e.g. 1.85, 2.10)</span>
+                                </div>
+                                <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="american" data-label="American Moneyline (+110, -120)">
+                                    <span>American Moneyline (+110, -120)</span>
+                                </div>
+                                <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="fractional" data-label="Fractional (5/6, 11/10)">
+                                    <span>Fractional (5/6, 11/10)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-1" style="font-size: 0.70rem;">Used across all match terminals and bet slip.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Default Stake Size ($ or U)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-dark text-secondary border-secondary">$</span>
+                            <input type="number" class="form-control bg-dark text-white border-secondary" id="prefStakeSize" value="100" min="5" step="25">
+                            <span class="input-group-text bg-dark text-secondary border-secondary">USD / 1.00 U</span>
+                        </div>
+                        <div class="small text-muted mt-1" style="font-size: 0.70rem;">Base unit for bankroll yield and Kelly stakes.</div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label small text-secondary">Default Risk Profile</label>
+                        <div class="custom-select-wrapper position-relative">
+                            <input type="hidden" id="prefRiskProfile" value="balanced">
+                            <button type="button"
+                                    class="custom-select-trigger"
+                                    role="combobox"
+                                    aria-haspopup="listbox"
+                                    aria-expanded="false"
+                                    aria-controls="prefRiskProfileList">
+                                <span class="custom-select-label">Balanced (Locks + Alpha Edge)</span>
+                                <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                            </button>
+                            <div class="custom-select-popover" id="prefRiskProfileList" role="listbox">
+                                <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="balanced" data-label="Balanced (Locks + Alpha Edge)">
+                                    <span>Balanced (Locks + Alpha Edge)</span>
+                                </div>
+                                <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="conservative" data-label="Capital Preservation (Locks only)">
+                                    <span>Capital Preservation (Locks only)</span>
+                                </div>
+                                <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="aggressive" data-label="Aggressive Growth (+EV Value only)">
+                                    <span>Aggressive Growth (+EV Value only)</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="small text-muted mt-1" style="font-size: 0.70rem;">Filter default for matches feed.</div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end mt-3 pt-2 border-top" style="border-color: var(--border-subtle) !important;">
+                    <button class="btn btn-sm text-white fw-bold px-4" style="background: var(--accent-blue);" onclick="savePreferences()">
+                        <i class="bi bi-check2-circle me-1"></i> Save Preferences
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="prefSaveAlert" class="alert alert-success d-none mt-3 py-2 px-3 mono small border-0" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; border: 1px solid rgba(46, 240, 104, 0.35) !important;">
+    <i class="bi bi-check-circle-fill me-1"></i> Terminal preferences saved successfully.
+</div>
+
+<script>
+    function loadPreferences() {
+        try {
+            const raw = localStorage.getItem('pikmatrix_preferences');
+            if (raw) {
+                const prefs = JSON.parse(raw);
+                if (prefs.oddsFormat && document.getElementById('prefOddsFormat')) {
+                    document.getElementById('prefOddsFormat').value = prefs.oddsFormat;
+                    const opt = document.querySelector(`#prefOddsFormatList [data-value="${prefs.oddsFormat}"]`);
+                    if (opt) {
+                        const lbl = document.querySelector('#prefOddsFormat + button .custom-select-label') || document.querySelector('#prefOddsFormat ~ button .custom-select-label');
+                        if (lbl) lbl.textContent = opt.getAttribute('data-label') || opt.textContent.trim();
+                    }
+                }
+                if (prefs.stake && document.getElementById('prefStakeSize')) {
+                    document.getElementById('prefStakeSize').value = prefs.stake;
+                }
+                if (prefs.risk && document.getElementById('prefRiskProfile')) {
+                    document.getElementById('prefRiskProfile').value = prefs.risk;
+                    const opt = document.querySelector(`#prefRiskProfileList [data-value="${prefs.risk}"]`);
+                    if (opt) {
+                        const lbl = document.querySelector('#prefRiskProfile + button .custom-select-label') || document.querySelector('#prefRiskProfile ~ button .custom-select-label');
+                        if (lbl) lbl.textContent = opt.getAttribute('data-label') || opt.textContent.trim();
+                    }
+                }
+            }
+        } catch (e) {}
+    }
+
+    function savePreferences() {
+        const oddsFormat = document.getElementById('prefOddsFormat').value;
+        const stake = document.getElementById('prefStakeSize').value;
+        const risk = document.getElementById('prefRiskProfile').value;
+        localStorage.setItem('pikmatrix_preferences', JSON.stringify({ oddsFormat, stake, risk }));
+        
+        const alertEl = document.getElementById('prefSaveAlert');
+        if (alertEl) {
+            alertEl.classList.remove('d-none');
+            setTimeout(() => {
+                alertEl.classList.add('d-none');
+            }, 3000);
+        }
+    }
+
+    loadPreferences();
+    document.addEventListener('htmx:afterSwap', loadPreferences);
+</script>
+{% endblock %}

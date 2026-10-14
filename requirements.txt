@@ -1,0 +1,35 @@
+# --- Database / ORM ---
+sqlalchemy>=2.0.0,<2.1.0
+psycopg2-binary>=2.9.0
+alembic>=1.13.0
+
+# --- Validation / Config ---
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# --- Data / ML ---
+pandas>=2.0.0
+numpy>=1.26.0
+scikit-learn>=1.4.0
+xgboost>=2.0.0
+
+# --- Scraping / Ingestion ---
+playwright>=1.40.0
+thefuzz>=0.22.0
+rapidfuzz>=3.6.0
+curl_cffi>=0.7.0
+httpx>=0.28.0
+nba_api>=1.11.0
+soccerdata>=1.5.0
+
+# --- Web Application ---
+fastapi>=0.110.0
+uvicorn>=0.28.0
+jinja2>=3.1.0
+
+# --- Authentication & Security ---
+passlib[bcrypt]>=1.7.4
+bcrypt>=3.2.0
+python-jose[cryptography]>=3.3.0
+python-multipart>=0.0.9
+

@@ -1,0 +1,49 @@
+<!-- Zero-CLS Match Board Loading Skeleton (XIAS Protocol) -->
+<div id="match-board-skeleton" class="htmx-indicator mb-3 select-none" aria-hidden="true" role="status" aria-label="Loading match telemetry...">
+    <!-- Sleek League Header Skeleton Bar -->
+    <div class="league-group-bar flex items-center justify-between px-3.5 py-2 rounded-t-xl bg-zinc-900 border border-zinc-800 animate-pulse">
+        <div class="flex items-center gap-2.5">
+            <div class="w-4 h-4 rounded bg-zinc-800/80"></div>
+            <div class="h-3.5 w-36 rounded bg-zinc-800/80"></div>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="h-4 w-6 rounded bg-zinc-800/80"></div>
+            <div class="w-3.5 h-3.5 rounded bg-zinc-800/60"></div>
+        </div>
+    </div>
+
+    <!-- 4 Blank Pulsing Cards matching exact sofa-match-row layout -->
+    <div class="border-x border-b border-zinc-800 rounded-b-xl overflow-hidden divide-y divide-zinc-800/60 bg-zinc-950/40">
+        {% for _ in range(4) %}
+        <div class="sofa-match-row animate-pulse bg-zinc-800/50 flex items-center px-3.5 py-2.5 min-h-[58px] transition-all">
+            <!-- 1. Left Column: Status / Kickoff Placeholder -->
+            <div class="sofa-left-col w-[55px] shrink-0 flex flex-col justify-center">
+                <div class="h-3.5 w-9 rounded bg-zinc-700/60"></div>
+            </div>
+
+            <!-- 2. Middle Column: Teams and Scores Placeholder -->
+            <div class="sofa-middle-col flex-1 min-w-0 flex flex-col justify-center gap-2 px-3">
+                <div class="sofa-team-row flex items-center justify-between h-5">
+                    <div class="sofa-team-info flex items-center gap-2 min-w-0">
+                        <div class="w-5 h-5 rounded-full bg-zinc-700/60 shrink-0"></div>
+                        <div class="h-3.5 w-32 rounded bg-zinc-700/60"></div>
+                    </div>
+                    <div class="h-3.5 w-4 rounded bg-zinc-700/50 shrink-0"></div>
+                </div>
+                <div class="sofa-team-row flex items-center justify-between h-5">
+                    <div class="sofa-team-info flex items-center gap-2 min-w-0">
+                        <div class="w-5 h-5 rounded-full bg-zinc-700/60 shrink-0"></div>
+                        <div class="h-3.5 w-28 rounded bg-zinc-700/60"></div>
+                    </div>
+                    <div class="h-3.5 w-4 rounded bg-zinc-700/50 shrink-0"></div>
+                </div>
+            </div>
+
+            <!-- 3. Right Column: AI Confidence Badge Placeholder -->
+            <div class="sofa-right-col w-[100px] shrink-0 flex items-center justify-end">
+                <div class="h-6 w-20 rounded-full bg-zinc-700/60"></div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>

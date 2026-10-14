@@ -1,0 +1,881 @@
+{% extends base_template %}
+
+{% block title %}{{ match.home_team }} vs {{ match.away_team }} | PikMatrix Match Intelligence{% endblock %}
+
+{% block content %}
+<div class="match-terminal-container max-w-7xl mx-auto px-3 sm:px-4 py-4 pb-32 text-gray-100">
+
+    <!-- Top Navigation / Breadcrumbs -->
+    <div class="flex items-center justify-between mb-4">
+        <a href="/matches"
+           hx-get="/matches"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-sm font-semibold bg-surface-card hover:bg-surface-raised text-gray-300 hover:text-white border border-divider transition-colors">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Matches</span>
+        </a>
+
+        <div class="flex items-center gap-2 text-xs font-mono text-gray-400">
+            <span class="w-4 h-4 rounded bg-zinc-800 border border-zinc-700/60 inline-flex items-center justify-center text-zinc-400 shrink-0">
+                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 4h16v6a7 7 0 0 1-14 0V4ZM12 17v4M8 21h8"/>
+                </svg>
+            </span>
+            <span class="text-white font-bold font-sans">{{ match.competition }}</span>
+            <span>•</span>
+            <span>{{ match.kickoff_display }}</span>
+        </div>
+    </div>
+
+    <!-- Match Header Hero Card -->
+    <div class="bg-surface-elevated border border-divider rounded-2xl p-4 sm:p-6 mb-6 shadow-2xl relative overflow-hidden">
+        <div class="absolute -top-24 -left-24 w-60 h-60 bg-blue-600/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-24 -right-24 w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+            <!-- Home Team -->
+            <div class="flex flex-col items-center md:items-start text-center md:text-left">
+                <div class="flex items-center gap-3">
+                    {% set home_logo = (home_entity and home_entity.logo_url) or match.home_logo_url %}
+                    {% if home_logo %}
+                        <div class="w-16 h-16 rounded-2xl bg-surface-card p-2 flex items-center justify-center shadow-lg border border-blue-400/30 overflow-hidden relative shrink-0">
+                            <img src="{{ home_logo }}"
+                                 alt="{{ match.home_team }}"
+                                 class="w-16 h-16 object-contain"
+                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                            <div style="display:none;" class="w-full h-full rounded-xl bg-gradient-to-br from-blue-600 to-indigo-800 text-white font-bold text-xl items-center justify-center shadow-lg">
+                                {{ match.home_initials or (match.home_team[:2] | upper) }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-800 text-white font-bold text-xl flex items-center justify-center shadow-lg border border-blue-400/30 shrink-0">
+                            {{ match.home_initials or (match.home_team[:2] | upper) }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-blue-400 font-semibold">Home Team</div>
+                        <h1 class="text-xl sm:text-2xl font-extrabold text-white leading-tight mb-0">{{ match.home_team }}</h1>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score / Kickoff Centerpiece -->
+            <div class="flex flex-col items-center justify-center text-center py-2">
+                {% if match.is_finished %}
+                    <div class="text-3xl sm:text-4xl font-extrabold font-mono text-white tracking-wider mb-1">
+                        {{ match.home_score if match.home_score is not none else 0 }} - {{ match.away_score if match.away_score is not none else 0 }}
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase bg-gray-800 text-gray-300 border border-gray-700">
+                        Final (FT)
+                    </span>
+                {% elif match.is_live %}
+                    <div class="text-3xl sm:text-4xl font-extrabold font-mono text-rose-500 tracking-wider mb-1 animate-pulse">
+                        {{ match.home_score if match.home_score is not none else 0 }} - {{ match.away_score if match.away_score is not none else 0 }}
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase bg-rose-500/20 text-rose-400 border border-rose-500/40">
+                        <span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>
+                        LIVE ({{ match.live_minute or "45'" }})
+                    </span>
+                {% else %}
+                    <div class="text-2xl sm:text-3xl font-extrabold font-mono text-white tracking-wide mb-1">
+                        {{ match.kickoff_time_str or 'Upcoming' }}
+                    </div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold uppercase bg-blue-500/10 text-blue-400 border border-blue-500/30">
+                        Scheduled
+                    </span>
+                {% endif %}
+                {% if promotion_tax_applied or match.promotion_tax_applied or (bivariate and bivariate.promotion_tax_applied) %}
+                    <div class="mt-2">
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/35 shadow-sm">
+                            <i class="bi bi-arrow-up-right-circle text-amber-400"></i> Historical Data Adjusted for League Promotion
+                        </span>
+                    </div>
+                {% endif %}
+            </div>
+
+
+            <!-- Away Team -->
+            <div class="flex flex-col items-center md:items-end text-center md:text-right">
+                <div class="flex items-center md:flex-row-reverse gap-3">
+                    {% set away_logo = (away_entity and away_entity.logo_url) or match.away_logo_url %}
+                    {% if away_logo %}
+                        <div class="w-16 h-16 rounded-2xl bg-surface-card p-2 flex items-center justify-center shadow-lg border border-emerald-400/30 overflow-hidden relative shrink-0">
+                            <img src="{{ away_logo }}"
+                                 alt="{{ match.away_team }}"
+                                 class="w-16 h-16 object-contain"
+                                 onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';" />
+                            <div style="display:none;" class="w-full h-full rounded-xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-bold text-xl items-center justify-center shadow-lg">
+                                {{ match.away_initials or (match.away_team[:2] | upper) }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-600 to-teal-800 text-white font-bold text-xl flex items-center justify-center shadow-lg border border-emerald-400/30 shrink-0">
+                            {{ match.away_initials or (match.away_team[:2] | upper) }}
+                        </div>
+                    {% endif %}
+                    <div>
+                        <div class="text-xs uppercase tracking-wider text-emerald-400 font-semibold">Away Team</div>
+                        <h2 class="text-xl sm:text-2xl font-extrabold text-white leading-tight mb-0">{{ match.away_team }}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN GRID: COMPARISON COLUMNS & STATS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+        <!-- COLUMN 1 & 2: SYNTHESIZED COMPARISON METRICS (Span 2) -->
+        <div class="lg:col-span-2 space-y-6">
+
+            <!-- SECTION: THE FEED'S OWN WEIGHTING -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-base">
+                            <i class="bi bi-sliders"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">The Feed's Own Weighting</h3>
+                            <p class="text-xs text-gray-400 mb-0">Algorithmic head-to-head distribution computed from synthesized telemetry</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2.5 py-1 rounded bg-blue-900/30 text-blue-300 border border-blue-700/40">
+                        PROPRIETARY FEED
+                    </span>
+                </div>
+
+                <div class="space-y-5">
+                    <!-- 1. Attack Strength Weighting -->
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-mono font-semibold mb-1.5">
+                            <span class="text-blue-400">{{ match.home_team }} ({{ home_attack_weight }}%)</span>
+                            <span class="text-gray-300 uppercase tracking-wider">Attack Weighting</span>
+                            <span class="text-emerald-400">({{ away_attack_weight }}%) {{ match.away_team }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden flex">
+                            <div class="bg-blue-600 h-2.5 rounded-l-full transition-all duration-500" style="width: {{ home_attack_weight }}%"></div>
+                            <div class="bg-emerald-500 h-2.5 rounded-r-full transition-all duration-500" style="width: {{ away_attack_weight }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 2. Defence Strength Weighting -->
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-mono font-semibold mb-1.5">
+                            <span class="text-blue-400">{{ match.home_team }} ({{ home_defense_weight }}%)</span>
+                            <span class="text-gray-300 uppercase tracking-wider">Defence Resilience</span>
+                            <span class="text-emerald-400">({{ away_defense_weight }}%) {{ match.away_team }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden flex">
+                            <div class="bg-blue-600 h-2.5 rounded-l-full transition-all duration-500" style="width: {{ home_defense_weight }}%"></div>
+                            <div class="bg-emerald-500 h-2.5 rounded-r-full transition-all duration-500" style="width: {{ away_defense_weight }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Form Momentum Weighting -->
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-mono font-semibold mb-1.5">
+                            <span class="text-blue-400">{{ match.home_team }} ({{ home_form_weight }}%)</span>
+                            <span class="text-gray-300 uppercase tracking-wider">Form Momentum</span>
+                            <span class="text-emerald-400">({{ away_form_weight }}%) {{ match.away_team }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden flex">
+                            <div class="bg-blue-600 h-2.5 rounded-l-full transition-all duration-500" style="width: {{ home_form_weight }}%"></div>
+                            <div class="bg-emerald-500 h-2.5 rounded-r-full transition-all duration-500" style="width: {{ away_form_weight }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Overall Match Dominance -->
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-mono font-semibold mb-1.5">
+                            <span class="text-blue-400">{{ match.home_team }} ({{ home_overall_weight }}%)</span>
+                            <span class="text-gray-300 uppercase tracking-wider">Overall Match Balance</span>
+                            <span class="text-emerald-400">({{ away_overall_weight }}%) {{ match.away_team }}</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 overflow-hidden flex">
+                            <div class="bg-blue-600 h-2.5 rounded-l-full transition-all duration-500" style="width: {{ home_overall_weight }}%"></div>
+                            <div class="bg-emerald-500 h-2.5 rounded-r-full transition-all duration-500" style="width: {{ away_overall_weight }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: LAST FIVE (ATTACK/DEFENCE RATINGS & FORM STRING) -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">Last Five Matches</h3>
+                            <p class="text-xs text-gray-400 mb-0">Rolling form streak, attack index, and defensive rating</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-700">
+                        LAST 5 GAMES
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Home Team Last Five -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-surface-card text-blue-400 font-bold text-xs flex items-center justify-center border border-blue-500/30 overflow-hidden p-0.5 shrink-0">
+                                    {% if home_logo %}
+                                        <img src="{{ home_logo }}" alt="{{ match.home_team }}" class="w-full h-full object-contain" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                                        <span style="display:none;">{{ match.home_initials or (match.home_team[:2] | upper) }}</span>
+                                    {% else %}
+                                        <span>{{ match.home_initials or (match.home_team[:2] | upper) }}</span>
+                                    {% endif %}
+                                </span>
+                                <span class="font-bold text-white text-sm truncate max-w-[150px]">{{ match.home_team }}</span>
+                            </div>
+                            <span class="text-xs text-blue-400 font-mono font-semibold">Home</span>
+                        </div>
+
+                        <!-- XIAS Terminal Form Sparklines -->
+                        <div class="mb-4">
+                            <div class="text-xs text-gray-400 mb-1.5 flex items-center justify-between">
+                                <span class="font-sans">Recent Form:</span>
+                                <span class="font-mono text-gray-300 font-bold tracking-wider">{{ home_stats.form_string or 'WWWDW' }}</span>
+                            </div>
+                            <div class="flex items-end gap-1.5 h-3.5 bg-zinc-950/60 border border-zinc-800/80 px-2.5 py-1.5 rounded-lg w-fit" role="img" aria-label="Recent Form Sparkline">
+                                {% for ch in (home_stats.form_string or 'WWWDW') %}
+                                    {% if ch == 'W' %}
+                                        <span class="bg-emerald-500 h-3 w-1.5 rounded-sm shrink-0 inline-block" title="Win"></span>
+                                    {% elif ch == 'D' %}
+                                        <span class="bg-zinc-500 h-1.5 w-1.5 rounded-sm shrink-0 inline-block" title="Draw"></span>
+                                    {% else %}
+                                        <span class="bg-rose-500 h-1 w-1.5 rounded-sm shrink-0 inline-block" title="Loss"></span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Attack & Defence Rating Bars -->
+                        <div class="space-y-2.5">
+                            <div>
+                                <div class="flex justify-between text-xs font-mono mb-1">
+                                    <span class="text-gray-400">Attack Rating</span>
+                                    <span class="text-white font-bold">{{ home_attack_rating }}/100</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ home_attack_rating }}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-mono mb-1">
+                                    <span class="text-gray-400">Defence Rating</span>
+                                    <span class="text-white font-bold">{{ home_defense_rating }}/100</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ home_defense_rating }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Away Team Last Five -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center gap-2">
+                                <span class="w-7 h-7 rounded-lg bg-surface-card text-emerald-400 font-bold text-xs flex items-center justify-center border border-emerald-500/30 overflow-hidden p-0.5 shrink-0">
+                                    {% if away_logo %}
+                                        <img src="{{ away_logo }}" alt="{{ match.away_team }}" class="w-full h-full object-contain" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                                        <span style="display:none;">{{ match.away_initials or (match.away_team[:2] | upper) }}</span>
+                                    {% else %}
+                                        <span>{{ match.away_initials or (match.away_team[:2] | upper) }}</span>
+                                    {% endif %}
+                                </span>
+                                <span class="font-bold text-white text-sm truncate max-w-[150px]">{{ match.away_team }}</span>
+                            </div>
+                            <span class="text-xs text-emerald-400 font-mono font-semibold">Away</span>
+                        </div>
+
+                        <!-- XIAS Terminal Form Sparklines -->
+                        <div class="mb-4">
+                            <div class="text-xs text-gray-400 mb-1.5 flex items-center justify-between">
+                                <span class="font-sans">Recent Form:</span>
+                                <span class="font-mono text-gray-300 font-bold tracking-wider">{{ away_stats.form_string or 'LDWWL' }}</span>
+                            </div>
+                            <div class="flex items-end gap-1.5 h-3.5 bg-zinc-950/60 border border-zinc-800/80 px-2.5 py-1.5 rounded-lg w-fit" role="img" aria-label="Recent Form Sparkline">
+                                {% for ch in (away_stats.form_string or 'LDWWL') %}
+                                    {% if ch == 'W' %}
+                                        <span class="bg-emerald-500 h-3 w-1.5 rounded-sm shrink-0 inline-block" title="Win"></span>
+                                    {% elif ch == 'D' %}
+                                        <span class="bg-zinc-500 h-1.5 w-1.5 rounded-sm shrink-0 inline-block" title="Draw"></span>
+                                    {% else %}
+                                        <span class="bg-rose-500 h-1 w-1.5 rounded-sm shrink-0 inline-block" title="Loss"></span>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Attack & Defence Rating Bars -->
+                        <div class="space-y-2.5">
+                            <div>
+                                <div class="flex justify-between text-xs font-mono mb-1">
+                                    <span class="text-gray-400">Attack Rating</span>
+                                    <span class="text-white font-bold">{{ away_attack_rating }}/100</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ away_attack_rating }}%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs font-mono mb-1">
+                                    <span class="text-gray-400">Defence Rating</span>
+                                    <span class="text-white font-bold">{{ away_defense_rating }}/100</span>
+                                </div>
+                                <div class="w-full bg-gray-800 rounded-full h-1.5 overflow-hidden">
+                                    <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ away_defense_rating }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: GOALS RECORD (OVER 1.5 & OVER 2.5 PERCENTAGES) -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-base">
+                            <i class="bi bi-bullseye"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">Goals Record</h3>
+                            <p class="text-xs text-gray-400 mb-0">Rolling historical goal threshold frequency across recent fixtures</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-700">
+                        OVER / UNDER METRICS
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center font-mono">
+                    <!-- Home Over 1.5 -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-xs text-blue-400 font-bold truncate mb-0.5">{{ match.home_team }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Over 1.5 Goals</div>
+                        <div class="text-xl sm:text-2xl font-extrabold text-white">{{ home_stats.over_1_5_pct or 75 }}%</div>
+                        <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ home_stats.over_1_5_pct or 75 }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Home Over 2.5 -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-xs text-blue-400 font-bold truncate mb-0.5">{{ match.home_team }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Over 2.5 Goals</div>
+                        <div class="text-xl sm:text-2xl font-extrabold text-white">{{ home_stats.over_2_5_pct or 50 }}%</div>
+                        <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                            <div class="bg-blue-500 h-1.5 rounded-full" style="width: {{ home_stats.over_2_5_pct or 50 }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Away Over 1.5 -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-xs text-emerald-400 font-bold truncate mb-0.5">{{ match.away_team }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Over 1.5 Goals</div>
+                        <div class="text-xl sm:text-2xl font-extrabold text-white">{{ away_stats.over_1_5_pct or 70 }}%</div>
+                        <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ away_stats.over_1_5_pct or 70 }}%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Away Over 2.5 -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-xs text-emerald-400 font-bold truncate mb-0.5">{{ match.away_team }}</div>
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Over 2.5 Goals</div>
+                        <div class="text-xl sm:text-2xl font-extrabold text-white">{{ away_stats.over_2_5_pct or 40 }}%</div>
+                        <div class="w-full bg-gray-800 rounded-full h-1.5 mt-2 overflow-hidden">
+                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: {{ away_stats.over_2_5_pct or 40 }}%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: SEASON SO FAR (CLEAN SHEETS & GOALS PER GAME) -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-base">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">Season So Far</h3>
+                            <p class="text-xs text-gray-400 mb-0">Defensive shutouts and scoring averages per 90 minutes</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-700">
+                        ROLLING TELEMETRY
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <!-- Clean Sheets Card -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-4 text-center">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-mono">Clean Sheets Kept</div>
+                        <div class="flex items-center justify-center gap-4 my-1">
+                            <div>
+                                <span class="text-2xl font-black text-blue-400 font-mono">{{ home_stats.clean_sheets or 0 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.home_team }}</div>
+                            </div>
+                            <span class="text-gray-600 font-bold">:</span>
+                            <div>
+                                <span class="text-2xl font-black text-emerald-400 font-mono">{{ away_stats.clean_sheets or 0 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.away_team }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goals Scored Per Game -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-4 text-center">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-mono">Goals Scored / Game</div>
+                        <div class="flex items-center justify-center gap-4 my-1">
+                            <div>
+                                <span class="text-2xl font-black text-blue-400 font-mono">{{ home_stats.goals_scored_per_game or 1.4 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.home_team }}</div>
+                            </div>
+                            <span class="text-gray-600 font-bold">:</span>
+                            <div>
+                                <span class="text-2xl font-black text-emerald-400 font-mono">{{ away_stats.goals_scored_per_game or 1.2 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.away_team }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Goals Conceded Per Game -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-4 text-center">
+                        <div class="text-xs text-gray-400 uppercase tracking-wider mb-2 font-mono">Goals Conceded / Game</div>
+                        <div class="flex items-center justify-center gap-4 my-1">
+                            <div>
+                                <span class="text-2xl font-black text-blue-400 font-mono">{{ home_stats.goals_conceded_per_game or 0.8 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.home_team }}</div>
+                            </div>
+                            <span class="text-gray-600 font-bold">:</span>
+                            <div>
+                                <span class="text-2xl font-black text-emerald-400 font-mono">{{ away_stats.goals_conceded_per_game or 1.0 }}</span>
+                                <div class="text-[10px] text-gray-400 truncate max-w-[80px]">{{ match.away_team }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION: ADVANCED TELEMETRY & DEFENSIVE SUPPRESSION -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 sm:p-6 shadow-xl">
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center text-base">
+                            <i class="bi bi-shield-shaded"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">Defensive Suppression & Match Factors</h3>
+                            <p class="text-xs text-gray-400 mb-0">Rolling xGA suppression, big chance ratios, and stalemate telemetry</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap justify-end">
+                        {% if promotion_tax_applied or match.promotion_tax_applied or (bivariate and bivariate.promotion_tax_applied) %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                <i class="bi bi-arrow-up-right-circle"></i> Historical Data Adjusted for League Promotion
+                            </span>
+                        {% endif %}
+                        {% if match.is_mutual_stalemate or (bivariate and bivariate.is_mutual_stalemate) %}
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold uppercase bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                <i class="bi bi-lock-fill"></i> Mutual Stalemate (0.82x Dampener)
+                            </span>
+                        {% else %}
+                            <span class="text-xs font-mono px-2 py-0.5 rounded bg-gray-800 text-gray-300 border border-gray-700">
+                                CALIBRATED MULTI-VAR
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center font-mono">
+                    <!-- Rolling xGA -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Rolling xGA / 90</div>
+                        <div class="flex items-center justify-center gap-2 my-1">
+                            <span class="text-lg font-bold text-blue-400">{{ home_stats.rolling_xga_per_game or 1.2 }}</span>
+                            <span class="text-gray-600">:</span>
+                            <span class="text-lg font-bold text-emerald-400">{{ away_stats.rolling_xga_per_game or 1.2 }}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">Opponent xG Conceded</div>
+                    </div>
+
+                    <!-- Shot Suppression -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Shots on Target Conc.</div>
+                        <div class="flex items-center justify-center gap-2 my-1">
+                            <span class="text-lg font-bold text-blue-400">{{ home_stats.rolling_shots_on_target_conceded or 4.0 }}</span>
+                            <span class="text-gray-600">:</span>
+                            <span class="text-lg font-bold text-emerald-400">{{ away_stats.rolling_shots_on_target_conceded or 4.0 }}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">Shot Suppression</div>
+                    </div>
+
+                    <!-- Big Chances Ratio -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">Big Chances Ratio</div>
+                        <div class="flex items-center justify-center gap-2 my-1">
+                            <span class="text-lg font-bold text-blue-400">{{ home_stats.big_chances_ratio or 1.0 }}</span>
+                            <span class="text-gray-600">:</span>
+                            <span class="text-lg font-bold text-emerald-400">{{ away_stats.big_chances_ratio or 1.0 }}</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">Created / Conceded</div>
+                    </div>
+
+                    <!-- 1st Half Clean Sheet % -->
+                    <div class="bg-surface-sunken border border-divider rounded-xl p-3">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-wider mb-1">1st Half CS %</div>
+                        <div class="flex items-center justify-center gap-2 my-1">
+                            <span class="text-lg font-bold text-blue-400">{{ home_stats.first_half_clean_sheet_pct or 50.0 }}%</span>
+                            <span class="text-gray-600">:</span>
+                            <span class="text-lg font-bold text-emerald-400">{{ away_stats.first_half_clean_sheet_pct or 50.0 }}%</span>
+                        </div>
+                        <div class="text-[10px] text-gray-500">0-0 at Halftime Rate</div>
+                    </div>
+                </div>
+
+                <!-- Disciplinary Volatility & Stalemate Index Footer Bar -->
+                <div class="mt-3 pt-3 border-t border-divider/60 flex flex-wrap items-center justify-between gap-3 text-xs font-mono">
+                    <div class="flex items-center gap-2 text-gray-400">
+                        <i class="bi bi-exclamation-triangle text-amber-400"></i>
+                        <span>Disciplinary Volatility:</span>
+                        <span class="text-blue-400 font-bold">{{ home_stats.foul_card_intensity or 2.0 }}</span>
+                        <span>/</span>
+                        <span class="text-emerald-400 font-bold">{{ away_stats.foul_card_intensity or 2.0 }}</span>
+                        <span class="text-gray-500 text-[10px]">cards/90</span>
+                    </div>
+                    <div class="flex items-center gap-2 text-gray-400">
+                        <i class="bi bi-pie-chart text-indigo-400"></i>
+                        <span>Stalemate Index:</span>
+                        <span class="text-blue-400 font-bold">{{ home_stats.stalemate_index or 0.0 }}</span>
+                        <span>/</span>
+                        <span class="text-emerald-400 font-bold">{{ away_stats.stalemate_index or 0.0 }}</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- COLUMN 3: OVERALL & POISSON MODEL + ACTIONABLE PREDICTIONS (Span 1) -->
+        <div class="space-y-6">
+
+            <!-- SECTION: OVERALL & POISSON WIN PROBABILITIES -->
+            <div class="bg-surface-card border border-divider rounded-2xl p-5 shadow-xl">
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-divider">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-base">
+                            <i class="bi bi-calculator"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-bold text-white mb-0">Overall & Poisson</h3>
+                            <p class="text-xs text-gray-400 mb-0">Bivariate Poisson Simulation</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+                        10K ITER
+                    </span>
+                </div>
+
+                <!-- 3-Way Poisson Distribution Bar -->
+                <div class="mb-4">
+                    <div class="w-full h-3 rounded-full overflow-hidden flex bg-gray-800 shadow-inner">
+                        <div class="bg-emerald-500 h-full transition-all duration-500" style="width: {{ home_win_pct }}%" title="{{ match.home_team }}: {{ home_win_pct }}%"></div>
+                        {% if draw_pct and draw_pct > 0 and match.sport_key == 'football' %}
+                            <div class="bg-gray-600 h-full transition-all duration-500" style="width: {{ draw_pct }}%" title="Draw: {{ draw_pct }}%"></div>
+                        {% endif %}
+                        <div class="bg-blue-600 h-full transition-all duration-500" style="width: {{ away_win_pct }}%" title="{{ match.away_team }}: {{ away_win_pct }}%"></div>
+                    </div>
+
+                    <!-- Labels Row -->
+                    <div class="flex justify-between items-center text-xs font-mono font-bold mt-2">
+                        <span class="text-emerald-400">{{ match.home_team }} {{ home_win_pct }}%</span>
+                        {% if draw_pct and draw_pct > 0 and match.sport_key == 'football' %}
+                            <span class="text-gray-400">Draw {{ draw_pct }}%</span>
+                        {% endif %}
+                        <span class="text-blue-400">{{ away_win_pct }}% {{ match.away_team }}</span>
+                    </div>
+                </div>
+
+                <!-- Poisson Simulation Projections Grid -->
+                <div class="grid grid-cols-2 gap-2 text-center font-mono text-xs">
+                    <div class="bg-surface-sunken border border-divider rounded-lg p-2.5">
+                        <div class="text-gray-400 text-[10px] uppercase">Projected Score</div>
+                        <div class="text-white font-extrabold text-base mt-0.5">{{ match.pred_score or '1 - 1' }}</div>
+                    </div>
+                    <div class="bg-surface-sunken border border-divider rounded-lg p-2.5">
+                        <div class="text-gray-400 text-[10px] uppercase">AI Confidence</div>
+                        <div class="text-emerald-400 font-extrabold text-base mt-0.5">{{ match.ai_confidence_pct or 75 }}%</div>
+                    </div>
+                    <div class="bg-surface-sunken border border-divider rounded-lg p-2.5">
+                        <div class="text-gray-400 text-[10px] uppercase truncate">{{ match.home_team }} xG</div>
+                        <div class="text-blue-400 font-bold text-sm mt-0.5">{{ match.expected_goals_home | round(2) if match.expected_goals_home else 1.54 }}</div>
+                    </div>
+                    <div class="bg-surface-sunken border border-divider rounded-lg p-2.5">
+                        <div class="text-gray-400 text-[10px] uppercase truncate">{{ match.away_team }} xG</div>
+                        <div class="text-emerald-400 font-bold text-sm mt-0.5">{{ match.expected_goals_away | round(2) if match.expected_goals_away else 1.18 }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PILLAR 2: THE AI PREDICTION DRAWER / CONFIDENCE MATRIX -->
+            <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+                <!-- Header -->
+                <div class="flex items-center justify-between pb-3 mb-4 border-b border-zinc-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <rect x="4" y="4" width="16" height="16" rx="2"></rect>
+                                <rect x="9" y="9" width="6" height="6"></rect>
+                                <line x1="9" y1="1" x2="9" y2="4"></line>
+                                <line x1="15" y1="1" x2="15" y2="4"></line>
+                                <line x1="9" y1="20" x2="9" y2="23"></line>
+                                <line x1="15" y1="20" x2="15" y2="23"></line>
+                                <line x1="20" y1="9" x2="23" y2="9"></line>
+                                <line x1="20" y1="14" x2="23" y2="14"></line>
+                                <line x1="1" y1="9" x2="4" y2="9"></line>
+                                <line x1="1" y1="14" x2="4" y2="14"></line>
+                            </svg>
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-sans font-bold text-white mb-0 uppercase tracking-wider">Confidence Matrix</h3>
+                            <p class="text-[11px] text-zinc-400 mb-0 font-sans">Multi-tier quantitative betting signals</p>
+                        </div>
+                    </div>
+                    <span class="text-xs font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/60">
+                        {{ predictions | length }} Plays
+                    </span>
+                </div>
+
+                {% if not predictions %}
+                    <div class="bg-zinc-950/60 border border-zinc-800/80 rounded-xl p-5 text-center">
+                        <svg class="w-8 h-8 text-zinc-600 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0-10.5a8.25 8.25 0 1 1 0 16.5 8.25 8.25 0 0 1 0-16.5ZM12 16.5h.008v.008H12v-.008Z"/>
+                        </svg>
+                        <div class="text-white text-xs sm:text-sm font-sans font-semibold">No active plays detected</div>
+                        <div class="text-xs text-zinc-400 mt-1 font-sans">Market margins compress expected value below threshold.</div>
+                    </div>
+                {% else %}
+                    <!-- Categorize into Low Variance Safety Nets vs High Variance Shots -->
+                    {% set low_variance_plays = [] %}
+                    {% set high_variance_plays = [] %}
+                    {% for pred in predictions %}
+                        {% set odds_flt = (pred.decimal_odds | float) if pred.decimal_odds else 1.85 %}
+                        {% set m_type_lower = (pred.market_type or '') | lower %}
+                        {% if odds_flt > 2.50 or 'score' in m_type_lower or 'exact' in m_type_lower %}
+                            {% set _ = high_variance_plays.append(pred) %}
+                        {% else %}
+                            {% set _ = low_variance_plays.append(pred) %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {# Hierarchy: Ensure High Variance Shots includes Exact Scores with odds > 2.50 #}
+                    {% if match.score_distribution %}
+                        {% for sc in match.score_distribution[:2] %}
+                            {% set sc_prob = sc.pct_num | round | int if sc.pct_num else 14 %}
+                            {% set _ = high_variance_plays.append({
+                                'id': 'cs-' ~ sc.score,
+                                'market_type': 'Exact Score',
+                                'selection': 'Exact Score ' ~ sc.score,
+                                'decimal_odds': sc.price_str,
+                                'model_prob_pct': sc_prob,
+                                'is_exact_score': true
+                            }) %}
+                        {% endfor %}
+                    {% endif %}
+
+                    <div class="space-y-4">
+                        <!-- TIER 1: LOW VARIANCE SAFETY NETS -->
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    <span class="text-xs font-sans font-bold text-zinc-200 tracking-wide uppercase">Low Variance Safety Nets</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-emerald-400 px-1.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/25">HIGH FLOOR</span>
+                            </div>
+
+                            {% if low_variance_plays %}
+                                <div class="space-y-2.5">
+                                    {% for pred in low_variance_plays %}
+                                        {% set prob = (pred.model_prob_pct or (pred.confidence_num * 100 if pred.confidence_num else (pred.confidence_score | float if pred.confidence_score else 80))) | round | int %}
+                                        {% set odds_val = pred.decimal_odds or "1.85" %}
+                                        {% set odds_flt = (pred.decimal_odds | float) if pred.decimal_odds else 1.85 %}
+                                        {% set st = (pred.settlement_status or (pred.settlement_badge.status if pred.settlement_badge is mapping else '')) | upper %}
+                                        {% set is_won = (st == 'WON') %}
+                                        {% set is_lost = (st == 'LOST') %}
+                                        {% set is_settled = is_won or is_lost or (st == 'PUSH') %}
+
+                                        <div class="category-pred-card bg-zinc-950/80 border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-3 transition-all cursor-pointer group"
+                                             onclick="addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, 'Low Risk', '{{ odds_val }}')">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <span class="text-[11px] font-sans font-medium px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/50">
+                                                    {{ pred.market_type }}
+                                                </span>
+                                                {% if is_settled %}
+                                                    {% if is_won %}
+                                                        <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">LANDED</span>
+                                                    {% elif is_lost %}
+                                                        <span class="text-[11px] font-mono font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded border border-rose-500/30">SETTLED</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-xs font-mono font-bold text-emerald-400">
+                                                        {{ prob }}% Prob
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="text-white font-sans font-semibold text-xs sm:text-sm mb-1.5 group-hover:text-emerald-400 transition-colors">
+                                                {{ pred.selection }}
+                                            </div>
+
+                                            <!-- Strict Horizontal Confidence Bar (XIAS Protocol) -->
+                                            <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden mb-2">
+                                                <div class="bg-emerald-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ prob }}%"></div>
+                                            </div>
+
+                                            <div class="flex items-center justify-between pt-1.5 border-t border-zinc-800/60 text-xs font-mono">
+                                                <span class="text-zinc-400">Odds: <strong class="text-white font-mono">{{ odds_val }}</strong></span>
+                                                <button class="pred-slip-btn px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono text-xs flex items-center gap-1 transition-colors hover:bg-emerald-600 hover:text-white hover:border-emerald-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] active:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-emerald-600 aria-selected:text-white"
+                                                        onclick="event.stopPropagation(); addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, 'Low Risk', '{{ odds_val }}')">
+                                                    <span>+ Slip</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="p-2.5 rounded-lg bg-zinc-950/40 border border-zinc-800/50 text-[11px] text-zinc-400 font-sans">
+                                    No direct safety net plays qualify for the risk-adjusted floor.
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- TIER 2: HIGH VARIANCE SHOTS -->
+                        <div class="pt-2 border-t border-zinc-800/80">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    <span class="text-xs font-sans font-bold text-zinc-200 tracking-wide uppercase">High Variance Shots</span>
+                                </div>
+                                <span class="text-[10px] font-mono text-amber-400 px-1.5 py-0.5 rounded bg-amber-500/10 border border-amber-500/25">HIGH CEILING</span>
+                            </div>
+
+                            {% if high_variance_plays %}
+                                <div class="space-y-2.5">
+                                    {% for pred in high_variance_plays %}
+                                        {% set prob = (pred.model_prob_pct or (pred.confidence_num * 100 if pred.confidence_num else (pred.confidence_score | float if pred.confidence_score else 45))) | round | int %}
+                                        {% set odds_val = pred.decimal_odds or "2.90" %}
+                                        {% set odds_flt = (pred.decimal_odds | float) if pred.decimal_odds else 2.90 %}
+                                        {% set st = (pred.settlement_status or (pred.settlement_badge.status if pred.settlement_badge is mapping else '')) | upper %}
+                                        {% set is_won = (st == 'WON') %}
+                                        {% set is_lost = (st == 'LOST') %}
+                                        {% set is_settled = is_won or is_lost or (st == 'PUSH') %}
+
+                                        <div class="category-pred-card bg-zinc-950/80 border border-zinc-800/80 hover:border-zinc-700 rounded-xl p-3 transition-all cursor-pointer group"
+                                             onclick="addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, 'High Risk', '{{ odds_val }}')">
+                                            <div class="flex items-center justify-between mb-1.5">
+                                                <div class="flex items-center gap-1.5">
+                                                    <span class="text-[11px] font-sans font-medium px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700/50">
+                                                        {{ pred.market_type }}
+                                                    </span>
+                                                    <!-- Variance Warning Badge for any true odds > 2.50 -->
+                                                    {% if odds_flt > 2.50 %}
+                                                        <span class="font-mono text-[9px] px-1.5 py-0.5 rounded bg-amber-500/15 border border-amber-500/35 text-amber-400 font-bold tracking-tight">VARIANCE WARNING</span>
+                                                    {% endif %}
+                                                </div>
+                                                {% if is_settled %}
+                                                    {% if is_won %}
+                                                        <span class="text-[11px] font-mono font-bold text-emerald-400 bg-emerald-500/15 px-2 py-0.5 rounded border border-emerald-500/30">LANDED</span>
+                                                    {% elif is_lost %}
+                                                        <span class="text-[11px] font-mono font-bold text-rose-400 bg-rose-500/15 px-2 py-0.5 rounded border border-rose-500/30">SETTLED</span>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-xs font-mono font-bold text-amber-400">
+                                                        {{ prob }}% Prob
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="text-white font-sans font-semibold text-xs sm:text-sm mb-1.5 group-hover:text-amber-400 transition-colors">
+                                                {{ pred.selection }}
+                                            </div>
+
+                                            <!-- Strict Horizontal Confidence Bar (XIAS Protocol) -->
+                                            <div class="w-full bg-zinc-800 rounded-full h-1.5 overflow-hidden mb-2">
+                                                <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: {{ prob }}%"></div>
+                                            </div>
+
+                                            <div class="flex items-center justify-between pt-1.5 border-t border-zinc-800/60 text-xs font-mono">
+                                                <span class="text-zinc-400">Odds: <strong class="text-amber-300 font-mono">{{ odds_val }}</strong></span>
+                                                <button class="pred-slip-btn px-2.5 py-1 rounded-md bg-zinc-800 text-zinc-200 border border-zinc-700 font-mono text-xs flex items-center gap-1 transition-colors hover:bg-amber-600 hover:text-white hover:border-amber-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] active:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-amber-600 aria-selected:text-white"
+                                                        onclick="event.stopPropagation(); addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, 'High Risk', '{{ odds_val }}')">
+                                                    <span>+ Slip</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                <div class="p-2.5 rounded-lg bg-zinc-950/40 border border-zinc-800/50 text-[11px] text-zinc-400 font-sans">
+                                    No high-variance longshot selections recommended by the risk engine.
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- PILLAR 1: EXACT SCORE HEATMAP (3x3 CSS GRID - BIVARIATE POISSON ENGINE) -->
+            {% set score_items = (match.score_distribution or score_distribution)[:9] %}
+            {% if score_items %}
+                <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between pb-3 mb-3 border-b border-zinc-800">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                            <h3 class="text-sm font-sans font-bold text-white mb-0 uppercase tracking-wider">Exact Score Heatmap</h3>
+                        </div>
+                        <span class="text-xs text-zinc-400 font-mono px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700/60">3×3 POISSON</span>
+                    </div>
+
+                    <!-- 3x3 CSS Grid with dynamic background opacity mapped directly to probability -->
+                    <div class="grid grid-cols-3 gap-2 font-mono">
+                        {% for sc in score_items %}
+                            {% set opac = sc.heat_opacity if sc.heat_opacity is defined else 0.25 %}
+                            {% set odds_cs = (sc.price_str | float) if sc.price_str else 6.50 %}
+                            <div class="relative group rounded-lg p-2.5 text-center cursor-pointer transition-all duration-150 border border-emerald-500/25 hover:border-emerald-400 hover:scale-[1.02] flex flex-col justify-between"
+                                 style="background-color: rgba(16, 185, 129, {{ opac }});"
+                                 onclick="addToSlip('cs-{{ sc.score }}', {{ match.id }}, 'Correct Score: {{ sc.score }}', 'Correct Score', {{ sc.pct_num | round | int if sc.pct_num else 12 }}, 'High Risk', '{{ sc.price_str }}')"
+                                 title="Add to slip: {{ sc.score }} @ {{ sc.price_str }} (Probability: {{ sc.pct or sc.chance_str }})">
+                                <div class="text-xs font-bold text-white drop-shadow-sm">{{ sc.score }}</div>
+                                <div class="text-[11px] font-bold text-emerald-100 mt-0.5">{{ sc.price_str }}</div>
+                                <div class="text-[10px] text-zinc-200 font-mono mt-0.5">{{ sc.pct or sc.chance_str }}</div>
+                                {% if odds_cs > 2.50 %}
+                                    <span class="text-[8px] font-mono text-amber-300 font-bold mt-1 tracking-tighter opacity-90">VAR &gt; 2.50</span>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="flex items-center justify-between text-[10px] font-mono text-zinc-400 mt-3 pt-2 border-t border-zinc-800/80">
+                        <span>Heatmap: Mathematical Poisson Density</span>
+                        <span class="text-emerald-400">Darker = Higher Edge</span>
+                    </div>
+                </div>
+            {% endif %}
+
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

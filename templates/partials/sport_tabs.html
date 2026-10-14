@@ -1,0 +1,119 @@
+<div class="sport-tabs-container flex items-center gap-1.5 p-1 rounded-xl bg-zinc-950/80 border border-zinc-800/80 backdrop-blur-md overflow-x-auto no-scrollbar select-none"
+     role="tablist"
+     id="sportTabList"
+     {% if is_oob %}hx-swap-oob="true"{% endif %}
+     aria-label="Filter matches by sport and competition">
+
+    <!-- 1. All Matches Tab -->
+    {% set is_all = (selected_sport == 'all' or not selected_sport) %}
+    <button type="button"
+            role="tab"
+            id="sport-pill-all"
+            data-tab-id="sport-tab-all"
+            aria-selected="{{ 'true' if is_all else 'false' }}"
+            aria-controls="match-board-container"
+            tabindex="{{ '0' if is_all else '-1' }}"
+            hx-get="/matches?sport=all{% if active_date_filter and active_date_filter != 'today' %}&filter={{ active_date_filter }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+            hx-target="#match-board-container"
+            hx-indicator="#match-board-skeleton"
+            hx-push-url="true"
+            class="sport-filter-tab sofa-sport-pill px-3.5 py-2 rounded-lg text-xs sm:text-sm font-sans font-medium inline-flex items-center gap-2 cursor-pointer transition-all duration-150 border-0 border-b-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus:text-zinc-100 active:bg-zinc-800/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-b-2 aria-selected:border-emerald-500 {% if is_all %}bg-zinc-800 text-white border-b-2 border-emerald-500 shadow-sm active{% else %}bg-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50{% endif %}">
+        <!-- Sleek Geometric Grid SVG -->
+        <svg class="w-4 h-4 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="7" rx="1.5"></rect>
+            <rect x="14" y="14" width="7" height="7" rx="1.5"></rect>
+            <rect x="3" y="14" width="7" height="7" rx="1.5"></rect>
+        </svg>
+        <span>All Matches</span>
+        <span class="font-mono text-[10px] px-1.5 py-0.5 rounded {% if is_all %}bg-zinc-700/80 text-emerald-400{% else %}bg-zinc-800/60 text-zinc-400{% endif %}">
+            {{ sport_match_counts.all if sport_match_counts and sport_match_counts.all is defined else (matches | length) }}
+        </span>
+    </button>
+
+    <!-- 2. Football Tab -->
+    {% set is_fb = (selected_sport == 'football') %}
+    <button type="button"
+            role="tab"
+            id="sport-pill-football"
+            data-tab-id="sport-tab-football"
+            aria-selected="{{ 'true' if is_fb else 'false' }}"
+            aria-controls="match-board-container"
+            tabindex="{{ '0' if is_fb else '-1' }}"
+            hx-get="/matches?sport=football{% if active_date_filter and active_date_filter != 'today' %}&filter={{ active_date_filter }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+            hx-target="#match-board-container"
+            hx-indicator="#match-board-skeleton"
+            hx-push-url="true"
+            class="sport-filter-tab sofa-sport-pill px-3.5 py-2 rounded-lg text-xs sm:text-sm font-sans font-medium inline-flex items-center gap-2 cursor-pointer transition-all duration-150 border-0 border-b-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus:text-zinc-100 active:bg-zinc-800/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-b-2 aria-selected:border-emerald-500 {% if is_fb %}bg-zinc-800 text-white border-b-2 border-emerald-500 shadow-sm active{% else %}bg-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50{% endif %}">
+        <!-- Sleek Geometric Football SVG (Strict Anti-Slop) -->
+        <svg class="w-4 h-4 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <polygon points="12,7 16,10 14.5,15 9.5,15 8,10"></polygon>
+            <line x1="12" y1="3" x2="12" y2="7"></line>
+            <line x1="20.5" y1="9" x2="16" y2="10"></line>
+            <line x1="18" y1="18" x2="14.5" y2="15"></line>
+            <line x1="6" y1="18" x2="9.5" y2="15"></line>
+            <line x1="3.5" y1="9" x2="8" y2="10"></line>
+        </svg>
+        <span>Football</span>
+        <span class="font-mono text-[10px] px-1.5 py-0.5 rounded {% if is_fb %}bg-zinc-700/80 text-emerald-400{% else %}bg-zinc-800/60 text-zinc-400{% endif %}">
+            {{ sport_match_counts.football if sport_match_counts and sport_match_counts.football is defined else 0 }}
+        </span>
+    </button>
+
+    <!-- 3. Basketball Tab -->
+    {% set is_bb = (selected_sport == 'basketball') %}
+    <button type="button"
+            role="tab"
+            id="sport-pill-basketball"
+            data-tab-id="sport-tab-basketball"
+            aria-selected="{{ 'true' if is_bb else 'false' }}"
+            aria-controls="match-board-container"
+            tabindex="{{ '0' if is_bb else '-1' }}"
+            hx-get="/matches?sport=basketball{% if active_date_filter and active_date_filter != 'today' %}&filter={{ active_date_filter }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+            hx-target="#match-board-container"
+            hx-indicator="#match-board-skeleton"
+            hx-push-url="true"
+            class="sport-filter-tab sofa-sport-pill px-3.5 py-2 rounded-lg text-xs sm:text-sm font-sans font-medium inline-flex items-center gap-2 cursor-pointer transition-all duration-150 border-0 border-b-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus:text-zinc-100 active:bg-zinc-800/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-b-2 aria-selected:border-emerald-500 {% if is_bb %}bg-zinc-800 text-white border-b-2 border-emerald-500 shadow-sm active{% else %}bg-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50{% endif %}">
+        <!-- Sleek Geometric Basketball SVG (Strict Anti-Slop) -->
+        <svg class="w-4 h-4 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <line x1="12" y1="3" x2="12" y2="21"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <path d="M5.5 5.5 C8.5 8.5 8.5 15.5 5.5 18.5"></path>
+            <path d="M18.5 5.5 C15.5 8.5 15.5 15.5 18.5 18.5"></path>
+        </svg>
+        <span>Basketball</span>
+        <span class="font-mono text-[10px] px-1.5 py-0.5 rounded {% if is_bb %}bg-zinc-700/80 text-emerald-400{% else %}bg-zinc-800/60 text-zinc-400{% endif %}">
+            {{ sport_match_counts.basketball if sport_match_counts and sport_match_counts.basketball is defined else 0 }}
+        </span>
+    </button>
+
+    <!-- 4. Tennis Tab -->
+    {% set is_tn = (selected_sport == 'tennis') %}
+    <button type="button"
+            role="tab"
+            id="sport-pill-tennis"
+            data-tab-id="sport-tab-tennis"
+            aria-selected="{{ 'true' if is_tn else 'false' }}"
+            aria-controls="match-board-container"
+            tabindex="{{ '0' if is_tn else '-1' }}"
+            hx-get="/matches?sport=tennis{% if active_date_filter and active_date_filter != 'today' %}&filter={{ active_date_filter }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+            hx-target="#match-board-container"
+            hx-indicator="#match-board-skeleton"
+            hx-push-url="true"
+            class="sport-filter-tab sofa-sport-pill px-3.5 py-2 rounded-lg text-xs sm:text-sm font-sans font-medium inline-flex items-center gap-2 cursor-pointer transition-all duration-150 border-0 border-b-2 border-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 focus:text-zinc-100 active:bg-zinc-800/80 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-b-2 aria-selected:border-emerald-500 {% if is_tn %}bg-zinc-800 text-white border-b-2 border-emerald-500 shadow-sm active{% else %}bg-transparent text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50{% endif %}">
+        <!-- Sleek Geometric Tennis Ball SVG (Strict Anti-Slop) -->
+        <svg class="w-4 h-4 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9"></circle>
+            <path d="M4.5 9 C8.5 11 8.5 13 4.5 15"></path>
+            <path d="M19.5 9 C15.5 11 15.5 13 19.5 15"></path>
+            <path d="M9 4.5 C11 8.5 13 8.5 15 4.5"></path>
+            <path d="M9 19.5 C11 15.5 13 15.5 15 19.5"></path>
+        </svg>
+        <span>Tennis</span>
+        <span class="font-mono text-[10px] px-1.5 py-0.5 rounded {% if is_tn %}bg-zinc-700/80 text-emerald-400{% else %}bg-zinc-800/60 text-zinc-400{% endif %}">
+            {{ sport_match_counts.tennis if sport_match_counts and sport_match_counts.tennis is defined else 0 }}
+        </span>
+    </button>
+</div>

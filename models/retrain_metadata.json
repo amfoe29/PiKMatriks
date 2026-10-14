@@ -1,0 +1,30 @@
+{
+  "last_trained_iso": "2026-10-04T20:26:41.531379+00:00",
+  "last_trained_display": "Oct 04, 2026 \u2022 20:26 UTC",
+  "total_samples": 10115,
+  "new_matches_added": 3,
+  "metrics": {
+    "football_1x": {
+      "accuracy": 0.7533,
+      "log_loss": 0.5095,
+      "roc_auc": 0.7416
+    },
+    "football_hcp": {
+      "accuracy": 0.6436,
+      "log_loss": 0.6295,
+      "roc_auc": 0.6959
+    },
+    "football_ou": {
+      "accuracy": 0.5734,
+      "log_loss": 0.6764,
+      "roc_auc": 0.599
+    },
+    "football_corners": {
+      "accuracy": 0.5408,
+      "log_loss": 0.6876,
+      "roc_auc": 0.5692
+    }
+  },
+  "engine_status": "active",
+  "self_learning": true
+}

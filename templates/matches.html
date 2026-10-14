@@ -1,0 +1,118 @@
+{% extends base_template %}
+
+{% block title %}PikMatrix | Matches & Predictions Feed{% endblock %}
+
+{% block content %}
+
+<div class="matches-hub-container" style="max-width: 960px; margin: 0 auto;">
+
+    <!-- Sport / League Filter Tabs (XIAS Protocol) -->
+    <div class="mb-3">
+        {% include "partials/sport_tabs.html" %}
+    </div>
+
+    <!-- Matches Feed Toolbar Row: Compact Date & Live Bar on Left, Top Edge Picks & Fixtures on Right -->
+    <div class="matches-toolbar-row">
+        <!-- Far Left: Compact Date & Live Navigation Bar (Mobile Sized) -->
+        <div class="sofa-date-nav-bar">
+            <!-- Far Left Circular LIVE Button -->
+            <a href="/matches?{% if selected_sport and selected_sport != 'all' %}sport={{ selected_sport }}&{% endif %}{% if active_date_filter == 'live' %}filter=today{% else %}filter=live{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+               hx-get="/matches?{% if selected_sport and selected_sport != 'all' %}sport={{ selected_sport }}&{% endif %}{% if active_date_filter == 'live' %}filter=today{% else %}filter=live{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="sofa-live-btn {% if active_date_filter == 'live' %}active{% endif %}"
+               id="sofaLiveBtn"
+               title="Filter Live Matches">
+                LIVE
+            </a>
+
+            <!-- Center Date Stepper (< Today >) -->
+            <div class="sofa-date-stepper">
+                <a href="{{ prev_date_url }}"
+                   hx-get="{{ prev_date_url }}"
+                   hx-target="#app-content"
+                   hx-push-url="true"
+                   class="sofa-stepper-btn"
+                   id="sofaPrevDayBtn"
+                   title="Previous Day">
+                    <i class="bi bi-chevron-left"></i>
+                </a>
+
+                <span class="sofa-stepper-label" id="sofaDateDisplay">
+                    {{ date_display_label }}
+                </span>
+
+                <a href="{{ next_date_url }}"
+                   hx-get="{{ next_date_url }}"
+                   hx-target="#app-content"
+                   hx-push-url="true"
+                   class="sofa-stepper-btn"
+                   id="sofaNextDayBtn"
+                   title="Next Day">
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+            </div>
+
+            <!-- Far Right Circular Calendar Icon (Day 9) -->
+            <a href="/matches?filter=today{% if selected_sport and selected_sport != 'all' %}&sport={{ selected_sport }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+               hx-get="/matches?filter=today{% if selected_sport and selected_sport != 'all' %}&sport={{ selected_sport }}{% endif %}{% if safe_only %}&safe_only=true{% endif %}"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="sofa-calendar-picker-btn {% if active_date_filter in ['today', ''] %}active{% endif %}"
+               id="sofaCalendarToggleBtn"
+               title="Today ({{ current_day_num or '9' }})">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="3" ry="3"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                    <text x="12" y="18.5" font-size="8.5" font-weight="800" text-anchor="middle" fill="currentColor" stroke="none">{{ current_day_num or '9' }}</text>
+                </svg>
+            </a>
+        </div>
+
+        <!-- Far Right: Top Edge Picks Toggle and Fixtures Count Badge -->
+        <div class="matches-toolbar-right">
+            <!-- Safe/Edge Picks Toggle -->
+            <a href="/matches?{% if selected_sport and selected_sport != 'all' %}sport={{ selected_sport }}&{% endif %}{% if active_date_filter %}filter={{ active_date_filter }}&{% endif %}safe_only={{ 'false' if safe_only else 'true' }}"
+               hx-get="/matches?{% if selected_sport and selected_sport != 'all' %}sport={{ selected_sport }}&{% endif %}{% if active_date_filter %}filter={{ active_date_filter }}&{% endif %}safe_only={{ 'false' if safe_only else 'true' }}"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="pred-chip-pill {% if safe_only %}pred-chip-lock text-emerald-400 border-emerald-500/30{% else %}pred-chip-neutral text-zinc-300 border-zinc-700/60{% endif %} bg-surface-card transition-all hover:bg-zinc-800 hover:border-amber-500 hover:text-amber-300 hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950 active:scale-[0.98] active:bg-zinc-800/90 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none aria-disabled:opacity-40 data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:text-rose-400 data-[error=true]:border-rose-500 aria-selected:bg-zinc-800 aria-selected:border-amber-500"
+               style="text-decoration: none; cursor: pointer; height: 32px; padding: 0 10px; display: inline-flex; align-items: center; gap: 5px; white-space: nowrap;"
+               title="Toggle highest confidence edge picks">
+                <svg class="w-3.5 h-3.5 text-signal-amber shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path>
+                </svg>
+                <span class="d-none d-sm-inline">Top Edge Picks</span>
+                <span class="d-inline d-sm-none">Top Edge</span>
+                <span>({{ total_safe_picks if total_safe_picks is defined else '12' }})</span>
+            </a>
+
+            <!-- Total Matches Count Badge -->
+            <span class="badge border mono fixtures-badge" id="fixturesCountBadge" style="background: var(--bg-surface-elevated); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.72rem; padding: 0 9px; height: 32px; display: inline-flex; align-items: center; border-radius: 6px; white-space: nowrap;">
+                {{ matches | length }} <span class="d-none d-sm-inline ms-1">Fixtures</span><span class="d-inline d-sm-none ms-1">Fix</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Match Board Container with Zero-CLS Skeleton and Match Content -->
+    <div id="match-board-container" class="relative">
+        {% include "partials/match_board.html" %}
+    </div>
+
+</div>
+
+<style>
+.cursor-pointer {
+    cursor: pointer !important;
+}
+.hover\:ring-2 {
+    transition: all 0.15s ease-in-out;
+}
+.hover\:ring-2:hover {
+    box-shadow: 0 0 0 2px rgba(35, 114, 245, 0.75) !important;
+    transform: translateY(-1px);
+}
+</style>
+{% endblock %}

@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PikMatrix | Terminal Login</title>
+    <!-- Google Fonts: Urbanist & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Global PikMatrix Dark Mode Stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- HTMX 1.9.10 -->
+    <script src="https://unpkg.com/htmx.org@1.9.10/dist/htmx.min.js"></script>
+
+    <style>
+        :root {
+            --bg-page: #0F141C;
+            --bg-surface: #161D27;
+            --bg-surface-elevated: #1F2836;
+            --border-subtle: #242E3F;
+            --text-primary: #FFFFFF;
+            --text-secondary: #8C9BA8;
+            --text-muted: #5E6D7D;
+            --primary-btn: #3852F5;
+            --primary-btn-hover: #2B42D6;
+            --accent-green: #00D084;
+            --accent-red: #E02B37;
+            --font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 10%, rgba(56, 82, 245, 0.12) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(35, 114, 245, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 10% 80%, rgba(0, 208, 132, 0.04) 0%, transparent 40%);
+        }
+
+        /* Subtle grid lines background overlay */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(36, 46, 63, 0.25) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(36, 46, 63, 0.25) 1px, transparent 1px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Institutional Dark Card */
+        .auth-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.04);
+            overflow: hidden;
+            backdrop-filter: blur(16px);
+            transition: border-color 0.3s ease;
+        }
+
+        .auth-card:hover {
+            border-color: rgba(56, 82, 245, 0.4);
+        }
+
+        /* Terminal Top Bar */
+        .auth-top-strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 20px;
+            background: rgba(15, 20, 28, 0.6);
+            border-bottom: 1px solid var(--border-subtle);
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .auth-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background-color: var(--accent-green);
+            box-shadow: 0 0 8px rgba(0, 208, 132, 0.8);
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        /* Header / Brand Section */
+        .auth-header {
+            padding: 30px 28px 20px 28px;
+            text-align: center;
+        }
+
+        .brand-icon-box {
+            width: 52px;
+            height: 52px;
+            background: linear-gradient(135deg, #3852F5 0%, #1B5EDB 100%);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 26px;
+            box-shadow: 0 8px 20px rgba(56, 82, 245, 0.4);
+            margin-bottom: 16px;
+            transition: transform 0.25s ease;
+        }
+
+        .auth-card:hover .brand-icon-box {
+            transform: scale(1.05) rotate(-2deg);
+        }
+
+        .brand-title {
+            font-size: 1.65rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+            margin-bottom: 4px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        /* Tab Switcher */
+        .auth-tabs {
+            display: flex;
+            background: #0F141C;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 3px;
+            margin: 0 28px 22px 28px;
+        }
+
+        .auth-tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border: none;
+            background: transparent;
+            color: var(--text-secondary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .auth-tab-btn.active {
+            background: var(--bg-surface);
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Form Body */
+        .auth-body {
+            padding: 0 28px 28px 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 7px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group-custom {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            pointer-events: none;
+            transition: color 0.2s ease;
+        }
+
+        .auth-input {
+            width: 100%;
+            height: 44px;
+            background: #0F141C;
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 8px 14px 8px 42px;
+            color: #ffffff;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--primary-btn);
+            background: #111722;
+            box-shadow: 0 0 0 3px rgba(56, 82, 245, 0.25);
+        }
+
+        .auth-input:focus + .input-icon,
+        .input-group-custom:focus-within .input-icon {
+            color: var(--primary-btn);
+        }
+
+        .toggle-pw-btn {
+            position: absolute;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            transition: color 0.2s ease;
+        }
+
+        .toggle-pw-btn:hover {
+            color: #ffffff;
+        }
+
+        /* Primary Button */
+        .auth-btn-primary {
+            width: 100%;
+            height: 46px;
+            background: var(--primary-btn);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 16px rgba(56, 82, 245, 0.35);
+            margin-top: 10px;
+        }
+
+        .auth-btn-primary:hover {
+            background: var(--primary-btn-hover);
+            box-shadow: 0 6px 20px rgba(56, 82, 245, 0.5);
+            transform: translateY(-1px);
+        }
+
+        .auth-btn-primary:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 8px rgba(56, 82, 245, 0.3);
+        }
+
+        /* Demo Fill Button */
+        .demo-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background: rgba(56, 82, 245, 0.06);
+            border: 1px dashed rgba(56, 82, 245, 0.3);
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 0.8rem;
+        }
+
+        .demo-label {
+            color: var(--text-secondary);
+        }
+
+        .btn-fill-demo {
+            background: rgba(56, 82, 245, 0.15);
+            border: 1px solid rgba(56, 82, 245, 0.4);
+            color: #8da4ff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-fill-demo:hover {
+            background: var(--primary-btn);
+            color: #ffffff;
+        }
+
+        /* Alert Banners */
+        .alert-auth {
+            padding: 12px 14px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .alert-danger {
+            background: rgba(224, 43, 55, 0.12);
+            border: 1px solid rgba(224, 43, 55, 0.35);
+            color: #ff757d;
+        }
+
+        .alert-success {
+            background: rgba(0, 208, 132, 0.12);
+            border: 1px solid rgba(0, 208, 132, 0.35);
+            color: #55f3b7;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Spinner Indicator */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request .htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request.htmx-indicator {
+            display: inline-block;
+        }
+        .htmx-request .btn-text-default {
+            display: none;
+        }
+
+        /* Card Footer */
+        .auth-footer {
+            padding: 16px 20px;
+            background: rgba(15, 20, 28, 0.4);
+            border-top: 1px solid var(--border-subtle);
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .auth-footer i {
+            color: var(--accent-green);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="auth-card">
+            <!-- Top Terminal Status Strip -->
+            <div class="auth-top-strip">
+                <div>
+                    <span class="auth-status-dot"></span>
+                    <span>PIKMATRIX QUANT TERMINAL</span>
+                </div>
+                <div>SECURE SESSION</div>
+            </div>
+
+            <!-- Header / Branding -->
+            <div class="auth-header">
+                <div class="brand-icon-box">
+                    <i class="bi bi-trophy-fill"></i>
+                </div>
+                <div class="brand-title">PikMatrix</div>
+                <div class="brand-subtitle">Sports Betting Intelligence & Quantitative Inference</div>
+            </div>
+
+            <!-- Tab Switcher (Sign In vs Register) -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn active" id="tab-login-btn" onclick="showTab('login')">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+                <button type="button" class="auth-tab-btn" id="tab-register-btn" onclick="showTab('register')">
+                    <i class="bi bi-person-plus me-1"></i> Register
+                </button>
+            </div>
+
+            <div class="auth-body">
+                <!-- Quick Demo Fill Helper -->
+                <div class="demo-bar" id="demoHelperBar">
+                    <div class="demo-label">
+                        <i class="bi bi-lightning-charge-fill text-warning me-1"></i> Demo account ready
+                    </div>
+                    <button type="button" class="btn-fill-demo" onclick="fillDemoCredentials()">
+                        Use Demo
+                    </button>
+                </div>
+
+                <!-- 1. LOGIN FORM -->
+                <div id="login-section">
+                    <!-- Feedback container for HTMX response errors / alerts -->
+                    <div id="login-feedback"></div>
+
+                    <form id="login-form"
+                          hx-post="/api/login"
+                          hx-target="#login-feedback"
+                          hx-swap="innerHTML"
+                          hx-indicator="#login-spinner">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="login-email">
+                                <span>Email Address</span>
+                            </label>
+                            <div class="input-group-custom">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <input type="email"
+                                       id="login-email"
+                                       name="email"
+                                       class="auth-input"
+                                       placeholder="trader@pikmatrix.com"
+                                       autocomplete="email"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="login-password">
+                                <span>Password</span>
+                            </label>
+                            <div class="input-group-custom">
+                                <i class="bi bi-lock input-icon"></i>
+                                <input type="password"
+                                       id="login-password"
+                                       name="password"
+                                       class="auth-input"
+                                       placeholder="••••••••"
+                                       autocomplete="current-password"
+                                       required>
+                                <button type="button" class="toggle-pw-btn" onclick="togglePasswordVisibility('login-password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="auth-btn-primary" id="loginSubmitBtn">
+                            <span class="btn-text-default">Sign In to Terminal</span>
+                            <span class="htmx-indicator" id="login-spinner">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span> Authenticating...
+                            </span>
+                            <i class="bi bi-arrow-right btn-text-default"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- 2. REGISTER FORM -->
+                <div id="register-section" style="display: none;">
+                    <!-- Feedback container for Register -->
+                    <div id="register-feedback"></div>
+
+                    <form id="register-form"
+                          hx-post="/api/register"
+                          hx-target="#register-feedback"
+                          hx-swap="innerHTML"
+                          hx-indicator="#register-spinner">
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="reg-username">
+                                <span>Username</span>
+                            </label>
+                            <div class="input-group-custom">
+                                <i class="bi bi-person input-icon"></i>
+                                <input type="text"
+                                       id="reg-username"
+                                       name="username"
+                                       class="auth-input"
+                                       placeholder="QuantTrader"
+                                       autocomplete="username"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-email">
+                                <span>Email Address</span>
+                            </label>
+                            <div class="input-group-custom">
+                                <i class="bi bi-envelope input-icon"></i>
+                                <input type="email"
+                                       id="reg-email"
+                                       name="email"
+                                       class="auth-input"
+                                       placeholder="trader@pikmatrix.com"
+                                       autocomplete="email"
+                                       required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="reg-password">
+                                <span>Password (min 6 chars)</span>
+                            </label>
+                            <div class="input-group-custom">
+                                <i class="bi bi-lock input-icon"></i>
+                                <input type="password"
+                                       id="reg-password"
+                                       name="password"
+                                       class="auth-input"
+                                       placeholder="Create secure password"
+                                       autocomplete="new-password"
+                                       minlength="6"
+                                       required>
+                                <button type="button" class="toggle-pw-btn" onclick="togglePasswordVisibility('reg-password', this)">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="auth-btn-primary" id="registerSubmitBtn">
+                            <span class="btn-text-default">Create Account</span>
+                            <span class="htmx-indicator" id="register-spinner">
+                                <span class="spinner-border spinner-border-sm me-2" role="status"></span> Creating Account...
+                            </span>
+                            <i class="bi bi-arrow-right btn-text-default"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Footer / Security Details -->
+            <div class="auth-footer">
+                <i class="bi bi-shield-check"></i>
+                <span>256-bit Encrypted Session • HttpOnly Cookie Protection</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tab) {
+            const loginSection = document.getElementById('login-section');
+            const registerSection = document.getElementById('register-section');
+            const tabLoginBtn = document.getElementById('tab-login-btn');
+            const tabRegisterBtn = document.getElementById('tab-register-btn');
+            const demoBar = document.getElementById('demoHelperBar');
+
+            if (tab === 'login') {
+                loginSection.style.display = 'block';
+                registerSection.style.display = 'none';
+                tabLoginBtn.classList.add('active');
+                tabRegisterBtn.classList.remove('active');
+                demoBar.style.display = 'flex';
+            } else {
+                loginSection.style.display = 'none';
+                registerSection.style.display = 'block';
+                tabRegisterBtn.classList.add('active');
+                tabLoginBtn.classList.remove('active');
+                demoBar.style.display = 'none';
+            }
+        }
+
+        function fillDemoCredentials() {
+            document.getElementById('login-email').value = 'demo@pikmatrix.com';
+            document.getElementById('login-password').value = 'pikmatrix2026';
+            document.getElementById('login-email').focus();
+        }
+
+        function togglePasswordVisibility(inputId, btn) {
+            const input = document.getElementById(inputId);
+            const icon = btn.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('bi-eye');
+                icon.classList.add('bi-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('bi-eye-slash');
+                icon.classList.add('bi-eye');
+            }
+        }
+    </script>
+</body>
+</html>

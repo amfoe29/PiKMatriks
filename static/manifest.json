@@ -1,0 +1,37 @@
+{
+  "name": "PikMatrix Sports Intelligence",
+  "short_name": "PikMatrix",
+  "description": "Terminal-Grade AI Sports Analytics & Predictive Odds Engine",
+  "start_url": "/matches",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#090A0F",
+  "background_color": "#090A0F",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "analytics", "finance"],
+  "shortcuts": [
+    {
+      "name": "Live Matches",
+      "url": "/matches?filter=live",
+      "description": "Real-time in-play fixtures & telemetry"
+    },
+    {
+      "name": "Value Scanner",
+      "url": "/tools",
+      "description": "Quantitative betting models and edges"
+    }
+  ]
+}

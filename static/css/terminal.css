@@ -1,0 +1,185 @@
+/**
+ * PikMatrix Quantitative Terminal & Telemetry Styles
+ * Precision displays for Poisson, Dixon-Coles, xG telemetry, +EV edge, and Kelly staking.
+ */
+
+/* Poisson Goal Distribution Matrix */
+.poisson-matrix-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 2px;
+  background-color: var(--border-hairline-color);
+  padding: 2px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.poisson-cell {
+  background-color: var(--surface-sunken);
+  padding: var(--space-2);
+  text-align: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  transition: background-color var(--motion-fast);
+}
+
+.poisson-cell.hot {
+  background-color: rgba(37, 99, 235, 0.35);
+  color: var(--text-primary);
+  font-weight: var(--font-weight-bold);
+}
+
+.poisson-cell.warm {
+  background-color: rgba(37, 99, 235, 0.18);
+  color: var(--text-primary);
+}
+
+.poisson-cell.cool {
+  background-color: var(--surface-card);
+  color: var(--text-muted);
+}
+
+/* xG & Telemetry Comparison Bars */
+.telemetry-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.telemetry-bar-track {
+  height: 6px;
+  background-color: var(--surface-raised);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  position: relative;
+}
+
+.telemetry-bar-fill {
+  height: 100%;
+  background-color: var(--action-accent);
+  border-radius: var(--radius-full);
+  transition: width var(--motion-normal);
+}
+
+.telemetry-bar-fill.positive {
+  background-color: var(--status-success);
+}
+
+.telemetry-bar-fill.warning {
+  background-color: var(--status-warning);
+}
+
+/* +EV Edge Tag */
+.ev-edge-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-full);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border: var(--border-hairline);
+}
+
+.ev-edge-badge.positive {
+  background-color: var(--telemetry-high-yield-bg);
+  color: var(--telemetry-edge-positive);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.ev-edge-badge.neutral {
+  background-color: var(--surface-raised);
+  color: var(--text-muted);
+  border-color: var(--border-hairline-color);
+}
+
+/* Settlement Status Badges (Full Hairline Border, Zero 1-Sided Borders) */
+.settlement-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-0-5) var(--space-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  border: var(--border-hairline);
+  text-transform: uppercase;
+}
+
+.settlement-badge.won {
+  background-color: var(--status-success-bg);
+  color: var(--status-success);
+  border-color: var(--status-success-border);
+}
+
+.settlement-badge.lost {
+  background-color: var(--status-error-bg);
+  color: var(--status-error);
+  border-color: var(--status-error-border);
+}
+
+.settlement-badge.void {
+  background-color: var(--surface-raised);
+  color: var(--text-muted);
+  border-color: var(--border-hairline-color);
+}
+
+.settlement-badge.pending {
+  background-color: var(--status-warning-bg);
+  color: var(--status-warning);
+  border-color: var(--status-warning-border);
+}
+
+/* Match Feed Row Item */
+.match-feed-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background-color: var(--surface-card);
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--motion-fast), background-color var(--motion-fast);
+}
+
+.match-feed-item:hover {
+  background-color: var(--surface-raised);
+  border-color: var(--border-strong-color);
+}
+
+.match-feed-item.active {
+  border-color: var(--action-accent);
+}
+
+/* Bet Slip Drawer */
+.slip-drawer-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--surface-card);
+  border-top: var(--border-hairline);
+  border-left: var(--border-hairline);
+  border-top-left-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  z-index: 45;
+  transform: translateY(100%);
+  transition: transform var(--motion-normal);
+}
+
+@media (min-width: 768px) {
+  .slip-drawer-panel {
+    bottom: var(--space-4);
+    right: var(--space-4);
+    border-radius: var(--radius-xl);
+    border: var(--border-hairline);
+  }
+}
+
+.slip-drawer-panel.open {
+  transform: translateY(0);
+}

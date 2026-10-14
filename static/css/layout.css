@@ -1,0 +1,267 @@
+/**
+ * PikMatrix Layout System (Mobile-First 320px Base + Min-Width Responsive Layers)
+ * Strict adherence to Senior Design Architect layout guidelines.
+ */
+
+/* Shell Container */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+}
+
+/* Top Navigation Bar */
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: var(--surface-backdrop);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--border-hairline);
+  padding: var(--space-2) var(--space-4);
+  transition: border-color var(--motion-fast);
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.brand-logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--font-family-display);
+  font-weight: var(--font-weight-black);
+  font-size: var(--font-size-lg);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.brand-badge {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-0-5) var(--space-1);
+  border-radius: var(--radius-sm);
+  background-color: var(--surface-elevated);
+  color: var(--text-muted);
+  border: var(--border-hairline);
+}
+
+/* Header Search Bar with Ctrl+K badge */
+.header-search-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: var(--surface-sunken);
+  border: var(--border-hairline);
+  border-radius: var(--radius-full);
+  padding: var(--space-1) var(--space-3);
+  width: 100%;
+  max-width: 380px;
+  min-height: 36px;
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+}
+
+.header-search-bar:focus-within {
+  border-color: var(--action-accent);
+  box-shadow: 0 0 0 1px var(--action-accent);
+}
+
+.header-search-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+  width: 100%;
+}
+
+.header-search-input::placeholder {
+  color: var(--text-dim);
+}
+
+.kbd-shortcut {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  padding: var(--space-0-5) var(--space-1);
+  background-color: var(--surface-card);
+  border: var(--border-hairline);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Secondary Navigation & Date Stepper Bar */
+.sub-nav-bar {
+  background-color: var(--surface-card);
+  border-bottom: var(--border-hairline);
+  padding: var(--space-2) var(--space-4);
+}
+
+.sub-nav-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .sub-nav-container {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.sport-pills-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  overflow-x: auto;
+  padding-bottom: var(--space-1);
+  scrollbar-width: none;
+}
+
+.sport-pills-row::-webkit-scrollbar {
+  display: none;
+}
+
+.date-stepper-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Main Content Area */
+.main-viewport {
+  flex: 1;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-3);
+}
+
+@media (min-width: 768px) {
+  .main-viewport {
+    padding: var(--space-6) var(--space-6);
+  }
+}
+
+/* Responsive Grid Families */
+.grid-dense-console {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 1024px) {
+  .grid-dense-console {
+    grid-template-columns: 320px 1fr 340px;
+    align-items: start;
+  }
+}
+
+.grid-split-terminal {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-6);
+}
+
+@media (min-width: 1024px) {
+  .grid-split-terminal {
+    grid-template-columns: 7fr 5fr;
+  }
+}
+
+.grid-bento-dashboard {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-4);
+}
+
+@media (min-width: 768px) {
+  .grid-bento-dashboard {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .grid-bento-dashboard {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Unified Floating Glass Nav Dock */
+.floating-dock-container {
+  position: fixed;
+  bottom: var(--space-4);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  background-color: var(--surface-backdrop);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: var(--border-hairline);
+  border-radius: var(--radius-full);
+  box-shadow: var(--shadow-glass);
+}
+
+.dock-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: all var(--motion-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.dock-item:hover {
+  color: var(--text-primary);
+  background-color: var(--surface-raised);
+}
+
+.dock-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.dock-item.active,
+.dock-item[aria-selected="true"] {
+  color: var(--action-primary-text);
+  background-color: var(--action-primary);
+}
+
+.dock-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--surface-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-family: var(--font-family-mono);
+  font-weight: var(--font-weight-bold);
+  color: var(--text-primary);
+  border: var(--border-hairline);
+}

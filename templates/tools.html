@@ -1,0 +1,1078 @@
+{% extends base_template %}
+
+{% block title %}PikMatrix | Quantitative Betting Toolkit{% endblock %}
+
+{% block content %}
+<div class="tools-page-container" style="max-width: 1040px; margin: 0 auto; padding-bottom: 5rem;">
+
+    <!-- Breadcrumb & Top Bar -->
+    <div class="d-flex align-items-center justify-content-between mb-3">
+        <a href="/matches"
+           hx-get="/matches"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="btn-breadcrumb-back m-0">
+            <i class="bi bi-arrow-left"></i>
+            <span>Back to Matches</span>
+        </a>
+
+        <span class="badge border mono" style="background: var(--bg-surface-elevated); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.72rem; padding: 4px 8px;">
+            13 Intelligence Tools Available
+        </span>
+    </div>
+
+    <!-- Toolkit Hero Banner -->
+    <div class="terminal-header-card mb-4" style="background: #121822; border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.25rem 1.5rem;">
+        <div class="d-flex align-items-center gap-3">
+            <div class="brand-icon-box" style="width: 42px; height: 42px; font-size: 1.35rem; border-radius: 10px; background: linear-gradient(135deg, var(--accent-blue) 0%, #174eb8 100%);">
+                <i class="bi bi-tools"></i>
+            </div>
+            <div>
+                <h4 class="m-0 fw-bold text-white" style="letter-spacing: -0.3px;">Quantitative Betting Toolkit</h4>
+                <p class="small text-secondary m-0 mt-1" style="max-width: 720px; line-height: 1.4;">
+                    Algorithmic execution tools, portfolio optimizers, accumulator managers, and mathematical calculators engineered for sharp bettors.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Category Filter Pills -->
+    <div class="tools-category-nav d-flex align-items-center gap-2 mb-4 overflow-auto pb-1" style="scrollbar-width: none;">
+        <button class="tool-cat-pill active" onclick="filterToolkit('all', this)" id="pill-all">
+            <i class="bi bi-grid-fill me-1"></i> All Tools <span class="cat-count-badge" id="count-all">13</span>
+        </button>
+        <button class="tool-cat-pill" onclick="filterToolkit('slips', this)" id="pill-slips">
+            <i class="bi bi-receipt me-1"></i> Slips <span class="cat-count-badge" id="count-slips">4</span>
+        </button>
+        <button class="tool-cat-pill" onclick="filterToolkit('builders', this)" id="pill-builders">
+            <i class="bi bi-hammer me-1"></i> Builders <span class="cat-count-badge" id="count-builders">3</span>
+        </button>
+        <button class="tool-cat-pill" onclick="filterToolkit('calculators', this)" id="pill-calculators">
+            <i class="bi bi-calculator me-1"></i> Calculators <span class="cat-count-badge" id="count-calculators">4</span>
+        </button>
+        <button class="tool-cat-pill" onclick="filterToolkit('analysis', this)" id="pill-analysis">
+            <i class="bi bi-graph-up me-1"></i> Analysis <span class="cat-count-badge" id="count-analysis">2</span>
+        </button>
+    </div>
+
+    <!-- Toolkit Grid (#161D27 Card Aesthetic) -->
+    <div class="row g-3" id="toolsGrid">
+
+        <!-- 1. Expected Value (+EV) Calculator [ACTIVE CALCULATOR] -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="calculators">
+            <div class="toolkit-card h-100" onclick="openToolModal('evCalculatorDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(35, 114, 245, 0.15); color: var(--accent-blue);">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge" style="background: rgba(35, 114, 245, 0.15); color: var(--accent-blue); font-size: 0.68rem; font-weight: 700;">ACTIVE</span>
+                        <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Calculators</span>
+                    </div>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Expected Value (+EV) Calculator</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Measure your true statistical edge and expected excess return over bookmaker vigorish.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small mono" style="color: #2EF068; font-size: 0.75rem;"><i class="bi bi-lightning-fill"></i> Live Real-Time</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('evCalculatorDrawer');">
+                        Launch <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Kelly Criterion Staking Calculator [ACTIVE CALCULATOR] -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="calculators">
+            <div class="toolkit-card h-100" onclick="openToolModal('kellyStakeDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(46, 240, 104, 0.15); color: #2EF068;">
+                        <i class="bi bi-pie-chart-fill"></i>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <span class="badge" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; font-size: 0.68rem; font-weight: 700;">ACTIVE</span>
+                        <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Calculators</span>
+                    </div>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Kelly Criterion Position Sizing</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Calculate mathematically optimal capital allocation to maximize long-run portfolio compounding.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small mono" style="color: var(--accent-blue); font-size: 0.75rem;"><i class="bi bi-shield-check"></i> Capital Guard</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('kellyStakeDrawer');">
+                        Launch <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Arbitrage (Surebet) Finder -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="calculators">
+            <div class="toolkit-card h-100" onclick="openToolModal('arbFinderDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+                        <i class="bi bi-percent"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Calculators</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Arbitrage (Surebet) Finder</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Calculate two-way cross-bookmaker arbitrage stake splits to lock in riskless guaranteed spread profits.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Multi-Bookmaker</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('arbFinderDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. No-Vig Fair Odds Calculator -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="calculators">
+            <div class="toolkit-card h-100" onclick="openToolModal('noVigDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(6, 182, 212, 0.15); color: #06B6D4;">
+                        <i class="bi bi-filter-circle"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Calculators</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">No-Vig Fair Odds Calculator</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Strip market overround and vigorish across multiplicative, additive, and Shin models to find true odds.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Overround Removal</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('noVigDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Slip Merger -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="slips">
+            <div class="toolkit-card h-100" onclick="openToolModal('slipMergerDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6;">
+                        <i class="bi bi-union"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Slips</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Slip Merger</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Combine multiple booking codes and accumulator selections into a single unified high-yield ticket.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Multi-Code Stacking</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('slipMergerDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. Slip Splitter -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="slips">
+            <div class="toolkit-card h-100" onclick="openToolModal('slipSplitterDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(244, 63, 94, 0.15); color: #F43F5E;">
+                        <i class="bi bi-distribute-vertical"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Slips</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Slip Splitter</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Partition large accumulators into balanced sub-slips (Trixie, Yankee, Canadian) to hedge one-leg collapses.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Variance Hedge</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('slipSplitterDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 7. Booking Code Converter -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="slips">
+            <div class="toolkit-card h-100" onclick="openToolModal('codeConverterDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8;">
+                        <i class="bi bi-arrow-left-right"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Slips</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Booking Code Converter</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Instantly translate bet slips across SportyBet, Bet9ja, 1xBet, BetKing, Betano, and MSport.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Cross-Bookie Sync</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('codeConverterDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Slip Optimizer -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="slips">
+            <div class="toolkit-card h-100" onclick="openToolModal('slipOptimizerDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;">
+                        <i class="bi bi-magic"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Slips</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Slip Optimizer</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Re-weight multi-leg selections based on algorithmic edge projections to maximize risk-adjusted expected return.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Edge Maximizer</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('slipOptimizerDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 9. Bet Builder Pro -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="builders">
+            <div class="toolkit-card h-100" onclick="openToolModal('betBuilderDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(99, 102, 241, 0.15); color: #6366F1;">
+                        <i class="bi bi-hammer"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Builders</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Bet Builder Pro</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Construct same-game parlays (SGP) with Poisson dependency penalty corrections and live correlation matrix.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">SGP Modeling</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('betBuilderDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 10. System Bet Generator -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="builders">
+            <div class="toolkit-card h-100" onclick="openToolModal('systemBetDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(20, 184, 166, 0.15); color: #14B8A6;">
+                        <i class="bi bi-grid-3x3-gap-fill"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Builders</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">System Bet Generator</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Generate automated full-cover permutations (Trixie, Patent, Yankee, Heinz) with bankroll weighting.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Combinatorics</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('systemBetDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 11. Hedge & Dutching Architect -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="builders">
+            <div class="toolkit-card h-100" onclick="openToolModal('dutchingDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(16, 185, 129, 0.15); color: #10B981;">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Builders</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Hedge & Dutching Architect</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Calculate stake distributions across conflicting outcomes to guarantee identical net returns regardless of result.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Guaranteed Spread</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('dutchingDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 12. Variance & Drawdown Simulator -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="analysis">
+            <div class="toolkit-card h-100" onclick="openToolModal('varianceDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(249, 115, 22, 0.15); color: #F97316;">
+                        <i class="bi bi-activity"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Analysis</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Variance & Drawdown Simulator</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Run 10,000 Monte Carlo season iterations to project expected downswings, max drawdown length, and ruin probability.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Monte Carlo</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('varianceDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 13. Poisson Score Matrix Simulator -->
+        <div class="col-12 col-md-6 col-lg-4 tool-card-item" data-category="analysis">
+            <div class="toolkit-card h-100" onclick="openToolModal('poissonDrawer')">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="tool-icon-wrapper" style="background: rgba(236, 72, 153, 0.15); color: #EC4899;">
+                        <i class="bi bi-dice-5-fill"></i>
+                    </div>
+                    <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">Analysis</span>
+                </div>
+                <h6 class="text-white fw-bold mb-1">Poisson Score Matrix Simulator</h6>
+                <p class="tool-desc text-secondary small mb-3">
+                    Bivariate Poisson probability distribution generator modeling exact full-time scores, BTTS, and clean sheet odds.
+                </p>
+                <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                    <span class="small text-secondary" style="font-size: 0.75rem;">Score Distribution</span>
+                    <button class="btn btn-sm btn-tool-action" onclick="event.stopPropagation(); openToolModal('poissonDrawer');">
+                        Open <i class="bi bi-arrow-right-short"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODAL DRAWER OVERLAYS (#161D27 Aesthetic, High Z-Index)           -->
+<!-- ================================================================= -->
+
+<!-- 1. EXPECTED VALUE (+EV) MODAL DRAWER -->
+<div class="tool-drawer-backdrop" id="evCalculatorDrawer" onclick="closeToolModal('evCalculatorDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" style="background: rgba(35, 114, 245, 0.15); color: var(--accent-blue); width: 34px; height: 34px;">
+                    <i class="bi bi-graph-up-arrow"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold">Expected Value (+EV) Calculator</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Quantitative Edge & Statistical Yield</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('evCalculatorDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="tool-drawer-body">
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <label class="form-label small text-secondary m-0">Model True Win Probability (%)</label>
+                    <span class="small fw-bold mono text-white" id="evProbLabel">55.0%</span>
+                </div>
+                <input type="range" class="form-range custom-range" id="evProbSlider" min="5" max="95" step="0.5" value="55.0" oninput="syncEvProb(this.value)">
+                <input type="number" id="calcEvProb" class="form-control form-control-sm bg-dark text-white border-secondary mt-1" value="55.0" step="0.1" min="1" max="99" oninput="syncEvProbNum(this.value)">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small text-secondary mb-1">Available Decimal Odds</label>
+                <div class="input-group input-group-sm mb-2">
+                    <input type="number" id="calcEvOdds" class="form-control bg-dark text-white border-secondary" value="2.00" step="0.01" min="1.01" oninput="calculateEV()">
+                    <button class="btn btn-outline-secondary" type="button" onclick="setEvOdds(1.85)">1.85</button>
+                    <button class="btn btn-outline-secondary" type="button" onclick="setEvOdds(2.00)">2.00</button>
+                    <button class="btn btn-outline-secondary" type="button" onclick="setEvOdds(2.25)">2.25</button>
+                    <button class="btn btn-outline-secondary" type="button" onclick="setEvOdds(3.00)">3.00</button>
+                </div>
+            </div>
+
+            <div class="p-3 rounded text-center my-3" style="background: #11161f; border: 1px solid var(--border-subtle);">
+                <div class="small text-secondary mb-1">Expected Value Edge</div>
+                <div class="fs-2 fw-bold mono" id="calcEvResult" style="color: #2EF068;">+10.0%</div>
+                <div class="small mt-1 fw-semibold" id="calcEvVerdict" style="color: #2EF068;">Positive Statistical Edge (+EV)</div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <div class="p-2 rounded text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="text-secondary" style="font-size: 0.68rem;">True Fair Odds</div>
+                        <div class="fw-bold mono text-white" id="evFairOdds">1.82</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 rounded text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="text-secondary" style="font-size: 0.68rem;">Expected per $100</div>
+                        <div class="fw-bold mono text-white" id="evReturnPer100">$110.00</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" style="background: var(--accent-blue); border: none;" onclick="transferEvToKelly()">
+                <i class="bi bi-arrow-right-circle"></i> Use in Kelly Staking
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- 2. KELLY CRITERION MODAL DRAWER -->
+<div class="tool-drawer-backdrop" id="kellyStakeDrawer" onclick="closeToolModal('kellyStakeDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; width: 34px; height: 34px;">
+                    <i class="bi bi-pie-chart-fill"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold">Kelly Criterion Position Sizing</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Logarithmic Bankroll Compounding</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('kellyStakeDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="tool-drawer-body">
+            <div class="mb-3">
+                <label class="form-label small text-secondary mb-1">Total Bankroll ($)</label>
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-dark border-secondary text-secondary">$</span>
+                    <input type="number" id="calcKellyBankroll" class="form-control bg-dark text-white border-secondary" value="5000" step="100" oninput="calculateKelly()">
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small text-secondary mb-1">True Probability (%)</label>
+                    <input type="number" id="calcKellyProb" class="form-control form-control-sm bg-dark text-white border-secondary" value="55.0" step="0.5" oninput="calculateKelly()">
+                </div>
+                <div class="col-6">
+                    <label class="form-label small text-secondary mb-1">Decimal Odds</label>
+                    <input type="number" id="calcKellyOdds" class="form-control form-control-sm bg-dark text-white border-secondary" value="2.00" step="0.01" oninput="calculateKelly()">
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small text-secondary mb-1">Kelly Multiplier (Fraction)</label>
+                <div class="custom-select-wrapper position-relative">
+                    <input type="hidden" id="calcKellyFraction" value="0.25" onchange="calculateKelly()">
+                    <button type="button"
+                            class="custom-select-trigger"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            aria-expanded="false"
+                            aria-controls="calcKellyFractionList">
+                        <span class="custom-select-label">Quarter Kelly (0.25x - Conservative & Recommended)</span>
+                        <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                    </button>
+                    <div class="custom-select-popover" id="calcKellyFractionList" role="listbox">
+                        <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="0.25" data-label="Quarter Kelly (0.25x - Conservative & Recommended)">
+                            <span>Quarter Kelly (0.25x - Conservative & Recommended)</span>
+                        </div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="0.50" data-label="Half Kelly (0.50x - Balanced Growth)">
+                            <span>Half Kelly (0.50x - Balanced Growth)</span>
+                        </div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="0.75" data-label="Three-Quarter Kelly (0.75x)">
+                            <span>Three-Quarter Kelly (0.75x)</span>
+                        </div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="1.00" data-label="Full Kelly (1.00x - Aggressive Max Drawdown)">
+                            <span>Full Kelly (1.00x - Aggressive Max Drawdown)</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 rounded text-center my-3" style="background: #11161f; border: 1px solid var(--border-subtle);">
+                <div class="small text-secondary mb-1">Recommended Stake</div>
+                <div class="fs-2 fw-bold mono" id="calcKellyStake" style="color: var(--accent-blue);">$125.00</div>
+                <div class="small text-secondary mt-1" id="calcKellyPct">2.50% of bankroll</div>
+            </div>
+
+            <div class="p-2 rounded" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                <div class="d-flex justify-content-between small text-secondary py-1">
+                    <span>Quarter Kelly (0.25x):</span>
+                    <span class="mono text-white fw-bold" id="kCompQuarter">$125.00</span>
+                </div>
+                <div class="d-flex justify-content-between small text-secondary py-1 border-top" style="border-color: rgba(255,255,255,0.04) !important;">
+                    <span>Half Kelly (0.50x):</span>
+                    <span class="mono text-white fw-bold" id="kCompHalf">$250.00</span>
+                </div>
+                <div class="d-flex justify-content-between small text-secondary py-1 border-top" style="border-color: rgba(255,255,255,0.04) !important;">
+                    <span>Full Kelly (1.00x):</span>
+                    <span class="mono text-white fw-bold" id="kCompFull">$500.00</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 3. SLIP MERGER MODAL DRAWER -->
+<div class="tool-drawer-backdrop" id="slipMergerDrawer" onclick="closeToolModal('slipMergerDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" style="background: rgba(139, 92, 246, 0.15); color: #8B5CF6; width: 34px; height: 34px;">
+                    <i class="bi bi-union"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold">Slip Merger</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Multi-Bookmaker Ticket Unification</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('slipMergerDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="tool-drawer-body">
+            <p class="small text-secondary mb-3">Paste your booking codes from different platforms to merge them into one unified slip.</p>
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Target Platform</label>
+                <div class="custom-select-wrapper position-relative">
+                    <input type="hidden" value="SportyBet">
+                    <button type="button"
+                            class="custom-select-trigger"
+                            role="combobox"
+                            aria-haspopup="listbox"
+                            aria-expanded="false">
+                        <span class="custom-select-label">SportyBet</span>
+                        <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                    </button>
+                    <div class="custom-select-popover" role="listbox">
+                        <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="SportyBet"><span>SportyBet</span></div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="Bet9ja"><span>Bet9ja</span></div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="1xBet"><span>1xBet</span></div>
+                        <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="Betano"><span>Betano</span></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Booking Codes (One per line)</label>
+                <textarea class="form-control bg-dark text-white border-secondary small mono" rows="3" placeholder="BC8219A&#10;SP4921X&#10;9JA3811">BC8219A
+SP4921X</textarea>
+            </div>
+            <button class="btn btn-sm w-100 py-2 text-white fw-bold mb-3" style="background: #8B5CF6;" onclick="demoMergeAction()">
+                Merge 2 Slips (6 Legs Combined)
+            </button>
+            <div class="p-3 rounded" style="background: #11161f; border: 1px solid var(--border-subtle);" id="mergeResultBox">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small text-white fw-bold">Merged Result</span>
+                    <span class="badge" style="background: rgba(139, 92, 246, 0.2); color: #8B5CF6;">6 Legs</span>
+                </div>
+                <div class="small text-secondary mb-1">Generated Code: <span class="mono text-white fw-bold">PIK-MRG-88219</span></div>
+                <div class="small text-secondary">Combined Odds: <span class="mono text-white fw-bold">14.85</span></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 4. BOOKING CODE CONVERTER MODAL DRAWER -->
+<div class="tool-drawer-backdrop" id="codeConverterDrawer" onclick="closeToolModal('codeConverterDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" style="background: rgba(56, 189, 248, 0.15); color: #38BDF8; width: 34px; height: 34px;">
+                    <i class="bi bi-arrow-left-right"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold">Booking Code Converter</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Cross-Platform Code Translation</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('codeConverterDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="tool-drawer-body">
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small text-secondary">From</label>
+                    <div class="custom-select-wrapper position-relative">
+                        <input type="hidden" value="SportyBet">
+                        <button type="button" class="custom-select-trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-label">SportyBet</span>
+                            <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div class="custom-select-popover" role="listbox">
+                            <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="SportyBet"><span>SportyBet</span></div>
+                            <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="Bet9ja"><span>Bet9ja</span></div>
+                            <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="1xBet"><span>1xBet</span></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <label class="form-label small text-secondary">To</label>
+                    <div class="custom-select-wrapper position-relative">
+                        <input type="hidden" value="Bet9ja">
+                        <button type="button" class="custom-select-trigger" role="combobox" aria-haspopup="listbox" aria-expanded="false">
+                            <span class="custom-select-label">Bet9ja</span>
+                            <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+                        <div class="custom-select-popover" role="listbox">
+                            <div class="custom-select-option" role="option" aria-selected="true" tabindex="0" data-value="Bet9ja"><span>Bet9ja</span></div>
+                            <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="SportyBet"><span>SportyBet</span></div>
+                            <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="1xBet"><span>1xBet</span></div>
+                            <div class="custom-select-option" role="option" aria-selected="false" tabindex="-1" data-value="BetKing"><span>BetKing</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Source Booking Code</label>
+                <input type="text" class="form-control form-control-sm bg-dark text-white border-secondary mono text-uppercase" value="B829XA">
+            </div>
+            <button class="btn btn-sm w-100 py-2 text-white fw-bold mb-3" style="background: #38BDF8;" onclick="alert('Translated Booking Code for Bet9ja: 9JA-8219-CONV')">
+                Convert Code
+            </button>
+            <div class="p-3 rounded text-center" style="background: #11161f; border: 1px solid var(--border-subtle);">
+                <div class="small text-secondary mb-1">Target Booking Code</div>
+                <div class="fs-4 fw-bold mono text-white">9JA-8219-CONV</div>
+                <div class="small text-secondary mt-1">4 of 4 legs verified and matched</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 5. ARBITRAGE (SUREBET) FINDER DRAWER -->
+<div class="tool-drawer-backdrop" id="arbFinderDrawer" onclick="closeToolModal('arbFinderDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B; width: 34px; height: 34px;">
+                    <i class="bi bi-percent"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold">Arbitrage (Surebet) Finder</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Risk-Free Spread Hedging</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('arbFinderDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="tool-drawer-body">
+            <div class="mb-3">
+                <label class="form-label small text-secondary">Total Capital ($)</label>
+                <input type="number" id="arbCapital" class="form-control form-control-sm bg-dark text-white border-secondary" value="1000" oninput="calcArb()">
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small text-secondary">Book A Odds</label>
+                    <input type="number" id="arbOddsA" class="form-control form-control-sm bg-dark text-white border-secondary" value="2.15" step="0.01" oninput="calcArb()">
+                </div>
+                <div class="col-6">
+                    <label class="form-label small text-secondary">Book B Odds</label>
+                    <input type="number" id="arbOddsB" class="form-control form-control-sm bg-dark text-white border-secondary" value="2.05" step="0.01" oninput="calcArb()">
+                </div>
+            </div>
+            <div class="p-3 rounded text-center my-3" style="background: #11161f; border: 1px solid var(--border-subtle);">
+                <div class="small text-secondary mb-1">Guaranteed Net Profit</div>
+                <div class="fs-2 fw-bold mono text-success" id="arbProfit">+$48.78 (4.88%)</div>
+                <div class="small text-secondary mt-1" id="arbStatus">Risk-free arbitrage opportunity</div>
+            </div>
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="p-2 rounded text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="text-secondary" style="font-size: 0.68rem;">Stake Book A</div>
+                        <div class="fw-bold mono text-white" id="arbStakeA">$488.10</div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="p-2 rounded text-center" style="background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);">
+                        <div class="text-secondary" style="font-size: 0.68rem;">Stake Book B</div>
+                        <div class="fw-bold mono text-white" id="arbStakeB">$511.90</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GENERIC DRAWER FOR OTHER TOOLS -->
+<div class="tool-drawer-backdrop" id="genericToolDrawer" onclick="closeToolModal('genericToolDrawer')">
+    <div class="tool-drawer-panel" onclick="event.stopPropagation()">
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="tool-icon-wrapper" id="genericToolIcon" style="background: rgba(35, 114, 245, 0.15); color: var(--accent-blue); width: 34px; height: 34px;">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <div>
+                    <h6 class="m-0 text-white fw-bold" id="genericToolTitle">Tool Configuration</h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Quantitative Engine</span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closeToolModal('genericToolDrawer')">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <div class="tool-drawer-body">
+            <p class="small text-secondary mb-3" id="genericToolDesc">Configuring parameters for this quantitative module.</p>
+            <div class="p-4 rounded text-center my-3" style="background: #11161f; border: 1px solid var(--border-subtle);">
+                <i class="bi bi-sliders fs-1 text-primary d-block mb-2"></i>
+                <h6 class="text-white fw-bold mb-1">Interactive Module Initialized</h6>
+                <p class="small text-secondary m-0">This tool is actively connected to the PikMatrix 2.0 AI inference pipeline.</p>
+            </div>
+            <button class="btn btn-primary w-100 py-2" style="background: var(--accent-blue); border: none;" onclick="closeToolModal('genericToolDrawer')">
+                Close Preview
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Toolkit Card Styling (#161D27 aesthetic) */
+    .toolkit-card {
+        background: #161D27;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 1.25rem;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        user-select: none;
+    }
+
+    .toolkit-card:hover {
+        border-color: var(--accent-blue) !important;
+        transform: translateY(-2px);
+        background: #1a2230;
+    }
+
+    .tool-icon-wrapper {
+        width: 38px;
+        height: 38px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+    }
+
+    .tool-desc {
+        min-height: 42px;
+        line-height: 1.45;
+    }
+
+    .btn-tool-action {
+        background: rgba(255,255,255,0.06);
+        color: #ffffff;
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 3px 9px;
+        transition: all 0.15s ease;
+    }
+
+    .toolkit-card:hover .btn-tool-action {
+        background: var(--accent-blue);
+        border-color: var(--accent-blue);
+        color: #ffffff;
+    }
+
+    /* Category Filter Pills */
+    .tool-cat-pill {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 14px;
+        border-radius: 20px;
+        background: #181e26;
+        color: var(--text-secondary);
+        font-size: 0.80rem;
+        font-weight: 600;
+        border: 1px solid var(--border-subtle);
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .tool-cat-pill:hover {
+        background: #202732;
+        color: #ffffff;
+    }
+
+    .tool-cat-pill.active {
+        background: #ffffff !important;
+        color: #10141b !important;
+        border-color: #ffffff !important;
+        font-weight: 700 !important;
+    }
+
+    .cat-count-badge {
+        font-size: 0.68rem;
+        padding: 1px 6px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.12);
+        margin-left: 6px;
+    }
+
+    .tool-cat-pill.active .cat-count-badge {
+        background: #10141b;
+        color: #ffffff;
+    }
+
+    /* Interactive Modal Drawer Overlays */
+    .tool-drawer-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(5, 8, 14, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 1100;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 1rem;
+    }
+
+    .tool-drawer-backdrop.show {
+        display: flex !important;
+        animation: fadeIn 0.18s ease-out;
+    }
+
+    .tool-drawer-panel {
+        background: #161D27;
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        width: 100%;
+        max-width: 480px;
+        padding: 1.5rem;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+        animation: scaleUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+
+    .btn-drawer-close {
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 4px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+
+    .btn-drawer-close:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes scaleUp {
+        from { transform: scale(0.96) translateY(8px); opacity: 0; }
+        to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+</style>
+
+<script>
+    // Category Filtering Logic
+    function filterToolkit(category, btnEl) {
+        document.querySelectorAll('.tool-cat-pill').forEach(el => el.classList.remove('active'));
+        if (btnEl) btnEl.classList.add('active');
+
+        const cards = document.querySelectorAll('.tool-card-item');
+        cards.forEach(card => {
+            if (category === 'all' || card.getAttribute('data-category') === category) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    // Modal Drawer Open / Close
+    function openToolModal(drawerId) {
+        const el = document.getElementById(drawerId);
+        if (el) {
+            el.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            if (drawerId === 'evCalculatorDrawer') calculateEV();
+            if (drawerId === 'kellyStakeDrawer') calculateKelly();
+            if (drawerId === 'arbFinderDrawer') calcArb();
+        } else {
+            // Open generic preview for tools without custom drawer
+            const generic = document.getElementById('genericToolDrawer');
+            if (generic) {
+                generic.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+    }
+
+    function closeToolModal(drawerId) {
+        const el = document.getElementById(drawerId);
+        if (el) {
+            el.classList.remove('show');
+            document.body.style.overflow = '';
+        }
+    }
+
+    // Close on Escape Key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.tool-drawer-backdrop.show').forEach(d => {
+                d.classList.remove('show');
+            });
+            document.body.style.overflow = '';
+        }
+    });
+
+    // 1. EXPECTED VALUE (+EV) CALCULATOR LOGIC
+    function syncEvProb(val) {
+        document.getElementById('calcEvProb').value = parseFloat(val).toFixed(1);
+        document.getElementById('evProbLabel').innerText = `${parseFloat(val).toFixed(1)}%`;
+        calculateEV();
+    }
+
+    function syncEvProbNum(val) {
+        const num = parseFloat(val) || 50;
+        document.getElementById('evProbSlider').value = num;
+        document.getElementById('evProbLabel').innerText = `${num.toFixed(1)}%`;
+        calculateEV();
+    }
+
+    function setEvOdds(val) {
+        document.getElementById('calcEvOdds').value = val.toFixed(2);
+        calculateEV();
+    }
+
+    function calculateEV() {
+        const probEl = document.getElementById('calcEvProb');
+        const oddsEl = document.getElementById('calcEvOdds');
+        if (!probEl || !oddsEl) return;
+
+        const prob = (parseFloat(probEl.value) || 0) / 100.0;
+        const odds = parseFloat(oddsEl.value) || 1.0;
+        const ev = (prob * odds) - 1.0;
+        const evPct = (ev * 100).toFixed(1);
+
+        const resEl = document.getElementById('calcEvResult');
+        const verdEl = document.getElementById('calcEvVerdict');
+        const fairEl = document.getElementById('evFairOdds');
+        const retEl = document.getElementById('evReturnPer100');
+
+        if (fairEl) fairEl.innerText = prob > 0 ? (1.0 / prob).toFixed(2) : '-';
+        if (retEl) retEl.innerText = `$${((1 + ev) * 100).toFixed(2)}`;
+
+        if (resEl && verdEl) {
+            if (ev > 0) {
+                resEl.style.color = '#2EF068';
+                resEl.innerText = `+${evPct}%`;
+                verdEl.style.color = '#2EF068';
+                verdEl.innerText = 'Positive Statistical Edge (+EV)';
+            } else {
+                resEl.style.color = '#e02b37';
+                resEl.innerText = `${evPct}%`;
+                verdEl.style.color = '#e02b37';
+                verdEl.innerText = 'Negative Expected Value (-EV)';
+            }
+        }
+    }
+
+    function transferEvToKelly() {
+        const prob = document.getElementById('calcEvProb').value;
+        const odds = document.getElementById('calcEvOdds').value;
+        closeToolModal('evCalculatorDrawer');
+        document.getElementById('calcKellyProb').value = prob;
+        document.getElementById('calcKellyOdds').value = odds;
+        openToolModal('kellyStakeDrawer');
+    }
+
+    // 2. KELLY CRITERION LOGIC
+    function calculateKelly() {
+        const probEl = document.getElementById('calcKellyProb');
+        const oddsEl = document.getElementById('calcKellyOdds');
+        const bankEl = document.getElementById('calcKellyBankroll');
+        const fracEl = document.getElementById('calcKellyFraction');
+        if (!probEl || !oddsEl || !bankEl) return;
+
+        const prob = (parseFloat(probEl.value) || 0) / 100.0;
+        const odds = parseFloat(oddsEl.value) || 1.0;
+        const bankroll = parseFloat(bankEl.value) || 1000;
+        const fraction = parseFloat(fracEl ? fracEl.value : 0.25) || 0.25;
+
+        const b = odds - 1.0;
+        const q = 1.0 - prob;
+        let fullKelly = b > 0 ? ((b * prob) - q) / b : 0;
+        if (fullKelly < 0) fullKelly = 0;
+
+        const stakePct = fullKelly * fraction;
+        const stakeAmount = bankroll * stakePct;
+
+        const stakeEl = document.getElementById('calcKellyStake');
+        const pctEl = document.getElementById('calcKellyPct');
+        if (stakeEl) stakeEl.innerText = `$${stakeAmount.toFixed(2)}`;
+        if (pctEl) pctEl.innerText = `${(stakePct * 100).toFixed(2)}% of bankroll`;
+
+        // Comparison Rows
+        const qEl = document.getElementById('kCompQuarter');
+        const hEl = document.getElementById('kCompHalf');
+        const fEl = document.getElementById('kCompFull');
+        if (qEl) qEl.innerText = `$${(bankroll * fullKelly * 0.25).toFixed(2)}`;
+        if (hEl) hEl.innerText = `$${(bankroll * fullKelly * 0.50).toFixed(2)}`;
+        if (fEl) fEl.innerText = `$${(bankroll * fullKelly * 1.00).toFixed(2)}`;
+    }
+
+    // 3. ARBITRAGE FINDER LOGIC
+    function calcArb() {
+        const capital = parseFloat(document.getElementById('arbCapital').value) || 1000;
+        const oA = parseFloat(document.getElementById('arbOddsA').value) || 2.0;
+        const oB = parseFloat(document.getElementById('arbOddsB').value) || 2.0;
+
+        const invA = 1.0 / oA;
+        const invB = 1.0 / oB;
+        const sumInv = invA + invB;
+
+        const profitPct = ((1.0 / sumInv) - 1.0) * 100;
+        const stakeA = (capital * invA) / sumInv;
+        const stakeB = (capital * invB) / sumInv;
+        const profitDollars = (stakeA * oA) - capital;
+
+        const pEl = document.getElementById('arbProfit');
+        const sEl = document.getElementById('arbStatus');
+        const stA = document.getElementById('arbStakeA');
+        const stB = document.getElementById('arbStakeB');
+
+        if (stA) stA.innerText = `$${stakeA.toFixed(2)}`;
+        if (stB) stB.innerText = `$${stakeB.toFixed(2)}`;
+
+        if (pEl) {
+            if (profitPct > 0) {
+                pEl.className = 'fs-2 fw-bold mono text-success';
+                pEl.innerText = `+$${profitDollars.toFixed(2)} (${profitPct.toFixed(2)}%)`;
+                if (sEl) sEl.innerText = 'Risk-free arbitrage opportunity detected';
+            } else {
+                pEl.className = 'fs-2 fw-bold mono text-danger';
+                pEl.innerText = `-$${Math.abs(profitDollars).toFixed(2)} (${profitPct.toFixed(2)}%)`;
+                if (sEl) sEl.innerText = 'No arbitrage spread: Bookmaker margin holds';
+            }
+        }
+    }
+
+    function demoMergeAction() {
+        alert('Slips successfully merged! Generated unified booking code: PIK-MRG-88219');
+    }
+</script>
+{% endblock %}

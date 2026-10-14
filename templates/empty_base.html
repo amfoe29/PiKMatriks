@@ -1,0 +1,16 @@
+{% block head %}
+<!-- Global Stylesheet with absolute path for partial views and base inheritance -->
+<link rel="stylesheet" href="/static/css/styles.css">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    if (typeof tailwind !== 'undefined') {
+        tailwind.config = {
+            corePlugins: {
+                preflight: false,
+            }
+        };
+    }
+</script>
+{% endblock %}
+{% block content %}{% endblock %}
+{% block extra_scripts %}{% endblock %}

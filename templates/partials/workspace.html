@@ -1,0 +1,29 @@
+<!-- Combined Master Workspace Partial: Column 2 (Feed) & Column 3 (Detail Panel) -->
+<main class="layout-col-center">
+    {% include "partials/feed.html" %}
+</main>
+
+<section class="layout-col-right" id="rightAnalysisColumn">
+    <!-- Loading Spinner Indicator for HTMX Swaps -->
+    <div id="loading-spinner" class="htmx-indicator py-2 text-center" style="display: none;">
+        <div class="spinner-border spinner-border-sm text-primary me-2" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <span class="small mono text-secondary">Analyzing match telemetry...</span>
+    </div>
+
+    <!-- Right Workspace Target for HTMX Swaps -->
+    <div class="right-panel-wrapper" id="match-detail-panel">
+        {% if selected_match %}
+            {% set match = selected_match %}
+            {% set predictions = selected_match.predictions %}
+            {% include "partials/match_detail.html" %}
+        {% else %}
+            <div class="empty-view-box">
+                <i class="bi bi-trophy fs-1 text-secondary d-block mb-3"></i>
+                <h5>No Fixture Selected</h5>
+                <p class="small text-secondary">Select any match from the center feed to view prediction stats and market insights.</p>
+            </div>
+        {% endif %}
+    </div>
+</section>

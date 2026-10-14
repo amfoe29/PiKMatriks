@@ -1,0 +1,3014 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PikMatrix | AI Sports Intelligence & Odds Terminal{% endblock %}</title>
+    <!-- Google Fonts: Urbanist & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700;800&display=swap" rel="stylesheet">
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- PWA Manifest & Mobile Viewport Properties -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#090A0F">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PikMatrix">
+    <!-- Global PikMatrix Dark Mode Stylesheet -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- Tailwind CSS with DTCG Token Architecture Configuration -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        if (typeof tailwind !== 'undefined') {
+            tailwind.config = {
+                darkMode: 'class',
+                corePlugins: {
+                    preflight: false,
+                },
+                theme: {
+                    extend: {
+                        colors: {
+                            surface: {
+                                canvas: '#090a0f',
+                                card: '#111827',
+                                elevated: '#161f2e',
+                                raised: '#1f2937',
+                                sunken: '#030712',
+                                overlay: 'rgba(3, 7, 18, 0.8)'
+                            },
+                            content: {
+                                primary: '#f9fafb',
+                                secondary: '#9ca3af',
+                                muted: '#6b7280',
+                                inverted: '#030712'
+                            },
+                            divider: {
+                                DEFAULT: '#1f2937',
+                                subtle: '#111827',
+                                strong: '#374151'
+                            },
+                            signal: {
+                                emerald: '#10b981',
+                                amber: '#f59e0b',
+                                rose: '#f43f5e',
+                                blue: '#3b82f6'
+                            }
+                        },
+                        fontFamily: {
+                            sans: ['Urbanist', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                            mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+                        }
+                    }
+                }
+            };
+        }
+    </script>
+    <!-- HTMX 1.9.10 -->
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <!-- Chart.js 4.4.1 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        :root {
+            /* Sofascore / Puntr Slate-Navy Design System Variables */
+            --bg-page: #0b0f17;
+            --bg-surface: #141b26;
+            --bg-surface-hover: #1c2636;
+            --bg-surface-elevated: #222e42;
+            --border-subtle: #222e42;
+            --text-primary: #ffffff;
+            --text-secondary: #8c9ba8;
+            --text-muted: #5e6d7d;
+            --accent-blue: #2372f5;
+            --accent-blue-hover: #1a62d6;
+            --accent-blue-bg: rgba(35, 114, 245, 0.14);
+            --accent-gray: #8c9ba8;
+            --accent-green: #2EF068;
+            --accent-red: #e02b37;
+            --font-family: 'Urbanist', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        * {
+            box-sizing: border-box;
+            box-shadow: none !important;
+            text-shadow: none !important;
+        }
+
+        body {
+            background-color: var(--bg-page) !important;
+            color: var(--text-primary);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            margin: 0;
+            padding-bottom: 96px; /* Space for floating bottom pill nav */
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            scroll-behavior: smooth;
+        }
+
+        /* Smooth scrolling on all scrollable containers & overscroll control */
+        .overflow-y-auto,
+        .overflow-x-auto,
+        .predictions-scroll-container,
+        .sofa-feed-col,
+        .sofa-feed-list,
+        .dashboard-wrapper,
+        .table-responsive,
+        .slip-drawer-body,
+        .terminal-tab-pane,
+        .comp-nav-list,
+        .header-sub-tier,
+        .sofa-tab-bar,
+        .nav-pills,
+        .date-filter-scroll,
+        .tools-category-nav,
+        .matches-hub-container,
+        .predictions-grid-layout,
+        .predictions-panel-grid,
+        .slip-drawer-panel,
+        .accordion-collapse,
+        .modal-body {
+            scroll-behavior: smooth !important;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior-y: contain;
+        }
+
+        button, input, select, textarea {
+            font-family: var(--font-family);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+        }
+
+        /* Slim Matte Ultra-Smooth Scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+            transition: background 0.2s ease;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        * {
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
+        }
+
+        /* Top Navigation Header (52px height + 40px sports tier) */
+        .app-header {
+            background-color: var(--bg-surface);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 1040;
+            backdrop-filter: blur(12px);
+        }
+
+        .header-top-tier {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 54px;
+            padding: 0 1.25rem;
+            border-bottom: 1px solid var(--border-subtle);
+            gap: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .brand-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            text-decoration: none;
+            color: var(--text-primary);
+            user-select: none;
+            cursor: pointer;
+        }
+
+        .brand-icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 7px;
+            background: linear-gradient(135deg, var(--accent-blue) 0%, #174eb8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 8px rgba(35, 114, 245, 0.3) !important;
+        }
+
+        .brand-title {
+            font-size: 1.22rem;
+            font-weight: 900;
+            letter-spacing: -0.4px;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .brand-tag {
+            font-size: 0.60rem;
+            font-weight: 800;
+            background: var(--accent-blue-bg);
+            color: var(--accent-blue);
+            border: 1px solid rgba(35, 114, 245, 0.3);
+            border-radius: 4px;
+            padding: 2px 5px;
+            letter-spacing: 0.5px;
+            margin-left: 2px;
+        }
+
+        /* Search Bar in Top Header (XIAS High-Density Terminal Search) */
+        .header-search-wrapper {
+            width: 320px;
+            max-width: 360px;
+            margin: 0;
+            position: relative;
+        }
+
+        .search-shortcut-badge {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #8c9ba8;
+            font-family: var(--font-mono, monospace);
+            font-size: 0.70rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 6px;
+            letter-spacing: 0.3px;
+            flex-shrink: 0;
+            user-select: none;
+        }
+
+        /* XIAS Zero-CLS Loading Indicators */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-indicator.htmx-request {
+            display: block !important;
+        }
+        #searchSpinner.htmx-indicator.htmx-request {
+            display: flex !important;
+        }
+
+        /* 5-Day Sofascore Calendar Date Strip */
+        .calendar-strip-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-subtle);
+            flex-wrap: wrap;
+        }
+
+        .sofa-calendar-strip {
+            display: inline-flex;
+            align-items: center;
+            background: #141b26;
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 4px;
+            gap: 2px;
+            user-select: none;
+        }
+
+        .sofa-cal-day {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            transition: all 0.15s ease;
+            min-width: 68px;
+            border: 1px solid transparent;
+            user-select: none;
+        }
+
+        .sofa-cal-day:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: #ffffff;
+        }
+
+        .sofa-cal-day .sofa-cal-abbr {
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            line-height: 1;
+        }
+
+        .sofa-cal-day .sofa-cal-num {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1.25;
+            letter-spacing: -0.3px;
+            margin: 2px 0;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+        }
+
+        .sofa-cal-day .sofa-cal-rel {
+            font-size: 0.68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            line-height: 1;
+        }
+
+        /* Active Day Card in 5-day strip */
+        .sofa-cal-day.active {
+            background: rgba(40, 90, 220, 0.18) !important;
+            border-color: rgba(56, 110, 245, 0.35) !important;
+        }
+
+        .sofa-cal-day.active .sofa-cal-abbr {
+            color: #4b88f8 !important;
+            font-weight: 700;
+        }
+
+        .sofa-cal-day.active .sofa-cal-num {
+            color: #4b88f8 !important;
+        }
+
+        .sofa-cal-day.active .sofa-cal-dot {
+            color: #4b88f8 !important;
+            margin-left: 2px;
+            font-size: 1.2rem;
+            line-height: 0;
+        }
+
+        .sofa-cal-day.active .sofa-cal-rel {
+            color: #4b88f8 !important;
+            font-weight: 700;
+        }
+
+        @media (max-width: 640px) {
+            .header-top-tier {
+                padding: 0 0.65rem;
+                gap: 0.45rem;
+            }
+            .header-right-actions {
+                flex: 1;
+                justify-content: flex-end;
+            }
+            .header-search-wrapper {
+                flex: 1;
+                max-width: 140px;
+                width: auto;
+                margin: 0;
+            }
+            .header-search-bar {
+                padding: 4px 8px 4px 10px;
+                height: 35px;
+            }
+            .header-search-input {
+                font-size: 0.82rem;
+            }
+            .search-shortcut-badge {
+                display: none;
+            }
+            .sofa-calendar-strip {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .sofa-cal-day {
+                padding: 6px 8px;
+                min-width: 48px;
+            }
+            .sofa-cal-day .sofa-cal-num {
+                font-size: 0.98rem;
+            }
+            .sofa-sport-pill {
+                padding: 5px 14px;
+                font-size: 0.82rem;
+            }
+            .matches-toolbar-row {
+                flex-direction: row !important;
+                align-items: center !important;
+                justify-content: space-between !important;
+                gap: 0.35rem !important;
+                flex-wrap: nowrap !important;
+            }
+            .sofa-date-nav-bar {
+                width: auto !important;
+                max-width: none !important;
+                padding: 2px 5px !important;
+                gap: 0.3rem !important;
+                flex-shrink: 0 !important;
+                margin-bottom: 0 !important;
+            }
+            .matches-toolbar-right {
+                width: auto !important;
+                justify-content: flex-end !important;
+                gap: 0.3rem !important;
+                flex-shrink: 0 !important;
+            }
+            .sofa-date-stepper {
+                gap: 0.3rem !important;
+            }
+            .sofa-stepper-btn {
+                font-size: 0.85rem !important;
+                padding: 1px 3px !important;
+            }
+            .sofa-stepper-label {
+                font-size: 0.78rem !important;
+                min-width: 44px !important;
+            }
+            .sofa-live-btn, .sofa-calendar-picker-btn {
+                width: 26px !important;
+                height: 26px !important;
+            }
+            .sofa-live-btn {
+                font-size: 0.58rem !important;
+            }
+            .sofa-calendar-picker-btn svg {
+                width: 14px !important;
+                height: 14px !important;
+            }
+            .pred-chip-pill, .fixtures-badge {
+                height: 28px !important;
+                padding: 0 6px !important;
+                font-size: 0.66rem !important;
+            }
+        }
+
+        /* Bet Slip Header Button */
+        .slip-header-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: var(--accent-blue);
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.38rem 0.85rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        .slip-header-btn:hover {
+            background: var(--accent-blue-hover);
+        }
+
+        .slip-count-badge {
+            background: #ffffff;
+            color: var(--bg-page);
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        /* Sport Filter Strip immediately below header */
+        /* Sport Filter Strip immediately below header (Image 1 Style) */
+        .header-sub-tier {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            height: 48px;
+            padding: 0 1.25rem;
+            background-color: #0b0e14;
+            border-bottom: 1px solid var(--border-subtle);
+            overflow-x: auto;
+            max-width: 1400px;
+            margin: 0 auto;
+            scrollbar-width: none;
+        }
+
+        .header-sub-tier::-webkit-scrollbar {
+            display: none;
+        }
+
+        .sports-nav-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Sofascore Pill Button (Image 1) */
+        .sofa-sport-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 18px;
+            border-radius: 9999px;
+            background: #181e26;
+            color: #8c9ba8;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            cursor: pointer;
+            user-select: none;
+            line-height: 1.4;
+        }
+
+        .sofa-sport-pill:hover {
+            background: #232a35;
+            color: #ffffff;
+        }
+
+        .sofa-sport-pill.active {
+            background: #ffffff !important;
+            color: #10141b !important;
+            font-weight: 700 !important;
+            border-color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Zero-CLS Skeleton Swapping Dynamics (XIAS Protocol) */
+        #match-board-skeleton {
+            display: none;
+        }
+        #match-board-skeleton.htmx-request {
+            display: block !important;
+        }
+        #match-board-skeleton.htmx-request + #match-board-content,
+        #match-board-container:has(#match-board-skeleton.htmx-request) #match-board-content {
+            display: none !important;
+        }
+
+        /* Fallback for legacy sport-chip */
+        .sport-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 18px;
+            border-radius: 9999px;
+            background: #181e26;
+            color: #8c9ba8;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.18s ease;
+        }
+        .sport-chip.active {
+            background: #ffffff !important;
+            color: #10141b !important;
+            font-weight: 700 !important;
+        }
+
+        /* ========================================================
+           SOFASCORE DATE NAVIGATION BAR (IMAGE 2 STYLE)
+           ======================================================== */
+        /* ========================================================
+           MATCHES FEED TOOLBAR & SOFASCORE DATE BAR
+           ======================================================== */
+        .matches-toolbar-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.85rem;
+            user-select: none;
+        }
+
+        .matches-toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        /* Compact Sofascore Date Navigation Bar (sized like mobile view) */
+        .sofa-date-nav-bar {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #0f141c;
+            border-radius: 10px;
+            padding: 3px 8px;
+            border: 1px solid var(--border-subtle);
+            user-select: none;
+            width: auto;
+            gap: 0.55rem;
+            flex-shrink: 0;
+        }
+
+        /* Far Left Circular LIVE Button */
+        .sofa-live-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #1b212a;
+            color: #ffffff;
+            font-size: 0.65rem;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.18s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .sofa-live-btn:hover {
+            background: #242c38;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .sofa-live-btn.active {
+            background: #dc2626 !important;
+            color: #ffffff !important;
+            border-color: #ef4444 !important;
+            box-shadow: 0 0 12px rgba(220, 38, 38, 0.5) !important;
+        }
+
+        /* Center Stepper: < Today > */
+        .sofa-date-stepper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.60rem;
+        }
+
+        .sofa-stepper-btn {
+            color: #ffffff;
+            font-size: 0.92rem;
+            background: transparent;
+            border: none;
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: all 0.15s ease;
+        }
+
+        .sofa-stepper-btn:hover {
+            color: var(--accent-blue);
+            background: rgba(255, 255, 255, 0.06);
+            transform: scale(1.1);
+        }
+
+        .sofa-stepper-label {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #ffffff;
+            min-width: 64px;
+            text-align: center;
+            letter-spacing: -0.2px;
+        }
+
+        /* Far Right Circular Calendar Picker Button */
+        .sofa-calendar-picker-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #1b212a;
+            color: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.18s ease;
+            cursor: pointer;
+            flex-shrink: 0;
+            padding: 0;
+        }
+
+        .sofa-calendar-picker-btn:hover {
+            background: #242c38;
+            color: #ffffff;
+            transform: scale(1.05);
+        }
+
+        .sofa-calendar-picker-btn.active {
+            border-color: rgba(255, 255, 255, 0.22);
+            background: #242c38;
+            color: #ffffff;
+        }
+
+        /* Main Content Container */
+        .app-content-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.25rem 1rem 7rem 1rem;
+            min-height: calc(100vh - 160px);
+        }
+
+        /* Floating Bottom Navigation Dock & Detached Profile Avatar */
+        .floating-dock-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            z-index: 1050;
+            pointer-events: none;
+            max-width: calc(100vw - 24px);
+        }
+
+        .app-bottom-nav {
+            pointer-events: auto;
+            display: inline-flex;
+            align-items: center;
+            background: #161D27;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 50px;
+            padding: 5px 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55), 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            gap: 4px;
+        }
+
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: #8c9ba8;
+            font-size: 0.70rem;
+            font-weight: 600;
+            gap: 2px;
+            padding: 6px 16px;
+            border-radius: 50px;
+            transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            user-select: none;
+            line-height: 1.1;
+            white-space: nowrap;
+            position: relative;
+            border: 1px solid transparent;
+        }
+
+        .bottom-nav-item i {
+            font-size: 1.12rem;
+            line-height: 1;
+            color: #8c9ba8;
+            transition: color 0.18s ease, transform 0.18s ease;
+        }
+
+        .bottom-nav-item:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .bottom-nav-item:hover i {
+            color: #ffffff;
+        }
+
+        .bottom-nav-item.active {
+            background: rgba(56, 82, 245, 0.15) !important;
+            color: #3852f5 !important;
+            border-color: rgba(56, 82, 245, 0.3) !important;
+            font-weight: 700;
+        }
+
+        .bottom-nav-item.active i {
+            color: #3852f5 !important;
+            transform: scale(1.08);
+        }
+
+        /* Profile Nav Item Avatar Badge (Inside Unified Dock) */
+        .bottom-nav-avatar {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: rgba(140, 155, 168, 0.22);
+            color: #8c9ba8;
+            font-family: var(--font-mono, monospace);
+            font-size: 0.62rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            transition: all 0.18s ease;
+        }
+
+        .bottom-nav-item:hover .bottom-nav-avatar {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .bottom-nav-item.active .bottom-nav-avatar {
+            background: #3852f5;
+            color: #ffffff;
+            box-shadow: 0 0 10px rgba(56, 82, 245, 0.45) !important;
+        }
+
+        @media (max-width: 480px) {
+            .floating-dock-container {
+                gap: 8px;
+                bottom: 14px;
+            }
+            .bottom-nav-item {
+                padding: 5px 11px;
+                font-size: 0.66rem;
+            }
+            .nav-profile-avatar-btn {
+                width: 46px;
+                height: 46px;
+            }
+        }
+
+        .pb-safe {
+            padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+        }
+
+        /* Bet Slip Drawer (Slide-Over) */
+        .slip-drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 360px;
+            max-width: 90vw;
+            height: 100vh;
+            background: var(--bg-surface);
+            border-left: 1px solid var(--border-subtle);
+            z-index: 1060;
+            transform: translateX(100%);
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slip-drawer.open {
+            transform: translateX(0);
+        }
+
+        .slip-drawer-header {
+            padding: 0.9rem 1.15rem;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .slip-drawer-body {
+            padding: 0.85rem 1.15rem;
+            overflow-y: auto;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .slip-drawer-footer {
+            padding: 1rem 1.15rem;
+            border-top: 1px solid var(--border-subtle);
+            background-color: var(--bg-surface-elevated);
+        }
+
+        .slip-item-card {
+            background: var(--bg-page);
+            border: 1px solid var(--border-subtle);
+            border-radius: 6px;
+            padding: 0.65rem 0.75rem;
+            position: relative;
+        }
+
+        .slip-item-remove {
+            position: absolute;
+            top: 0.45rem;
+            right: 0.45rem;
+            color: var(--text-muted);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.80rem;
+        }
+
+        .slip-item-remove:hover {
+            color: #ffffff;
+        }
+
+        .slip-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 1055;
+            display: none;
+        }
+
+        .slip-overlay.open {
+            display: block;
+        }
+
+        .empty-view-box {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            color: var(--text-muted);
+        }
+
+        /* HTMX Indicator Styling */
+        .htmx-indicator {
+            display: none;
+        }
+        .htmx-request.htmx-indicator,
+        .htmx-request .htmx-indicator {
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Loading Spinner Bar for HTMX Swaps */
+        #page-loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--accent-blue);
+            z-index: 9999;
+            transform: scaleX(0);
+            transform-origin: 0% 50%;
+            transition: transform 0.2s ease;
+            display: none;
+        }
+        .htmx-request#page-loading-bar,
+        body.htmx-request #page-loading-bar {
+            display: block;
+            transform: scaleX(0.7);
+        }
+
+        /* Global Reusable Styles for Matches & View */
+        .league-group-bar {
+            height: 36px;
+            background: var(--bg-surface-elevated);
+            padding: 4px 14px;
+            border-radius: 8px 8px 0 0;
+            border: 1px solid var(--border-subtle);
+            border-bottom: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            user-select: none;
+            cursor: pointer;
+            margin-top: 1rem;
+            transition: background 0.15s ease;
+        }
+        .league-group-bar:hover {
+            background: var(--bg-surface-hover);
+        }
+        .league-group-bar.collapsed {
+            border-radius: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .league-group-bar .chevron-icon {
+            transition: transform 0.2s ease;
+            color: var(--text-muted);
+        }
+        .league-group-bar.collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+
+        .league-group-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+
+        .league-group-matches {
+            border: 1px solid var(--border-subtle);
+            border-radius: 0 0 8px 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+        .league-group-matches.collapsed-content {
+            display: none;
+        }
+
+        /* Match Row Styling */
+        .sofa-match-row {
+            min-height: 56px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-subtle);
+            border-left: 3px solid transparent;
+            display: flex;
+            align-items: center;
+            padding: 0 14px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+            text-decoration: none;
+            color: inherit;
+        }
+        .sofa-match-row:last-child {
+            border-bottom: none;
+        }
+        .sofa-match-row:hover {
+            background-color: var(--bg-surface-hover) !important;
+            border-left-color: var(--accent-blue) !important;
+            transform: translateX(2px);
+        }
+
+        .sofa-left-col {
+            width: 55px;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        .sofa-left-col .live-minute {
+            color: var(--accent-red);
+            font-weight: 800;
+        }
+        .sofa-left-col .ft-text {
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 0.72rem;
+        }
+
+        .sofa-middle-col {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 3px;
+            padding: 0 12px;
+        }
+
+        .sofa-team-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 20px;
+        }
+
+        .sofa-team-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        .sofa-team-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            color: #ffffff;
+            font-size: 0.62rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .sofa-team-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sofa-score {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-left: 8px;
+            flex-shrink: 0;
+        }
+
+        .sofa-right-col {
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            min-width: 85px;
+        }
+
+        .pred-chip-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            white-space: nowrap;
+            border: 1px solid transparent;
+            line-height: 1.2;
+        }
+
+        .pred-chip-edge {
+            background: rgba(140, 155, 168, 0.12);
+            color: var(--accent-gray);
+            border-color: rgba(140, 155, 168, 0.35);
+        }
+
+        .pred-chip-lock {
+            background: rgba(35, 114, 245, 0.14);
+            color: var(--accent-blue);
+            border-color: rgba(35, 114, 245, 0.40);
+        }
+
+        .pred-chip-neutral {
+            background: var(--bg-surface-elevated);
+            color: var(--text-secondary);
+            border-color: var(--border-subtle);
+        }
+
+        /* Match Terminal Layout Styles */
+        .terminal-header-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .terminal-matchup-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            margin: 1rem 0;
+        }
+
+        .terminal-team {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .terminal-team-crest {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--bg-surface-elevated);
+            border: 2px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 0.5rem;
+        }
+
+        .terminal-team-name {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .terminal-center-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 0 1rem;
+        }
+
+        .terminal-score-num {
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: 2px;
+        }
+
+        .terminal-status-badge {
+            font-size: 0.70rem;
+            font-weight: 800;
+            padding: 3px 10px;
+            border-radius: 4px;
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            margin-top: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Horizontal Poisson Win/Draw/Loss Bar */
+        .poisson-gauge-container {
+            margin-top: 1rem;
+            padding-top: 0.85rem;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .poisson-bar {
+            display: flex;
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            background: var(--bg-surface-elevated);
+            margin-bottom: 0.5rem;
+        }
+
+        .poisson-fill-home {
+            background: #2EF068;
+            transition: width 0.4s ease;
+        }
+
+        .poisson-fill-draw {
+            background: rgba(255, 255, 255, 0.20);
+            transition: width 0.4s ease;
+        }
+
+        .poisson-fill-away {
+            background: var(--accent-blue);
+            transition: width 0.4s ease;
+        }
+
+        .poisson-labels-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.76rem;
+            font-weight: 700;
+        }
+
+        /* Categorical Prediction Card Styles */
+        .category-pred-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 1rem 1.15rem;
+            margin-bottom: 0.75rem;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .category-pred-card:hover {
+            border-color: rgba(35, 114, 245, 0.4);
+            background: #17202d;
+        }
+
+        .category-pred-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--accent-blue);
+            background: var(--accent-blue-bg);
+            border: 1px solid rgba(35, 114, 245, 0.25);
+            padding: 2px 7px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .category-pred-title {
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin-top: 4px;
+        }
+
+        /* Radial Dial for Win Probability */
+        .radial-dial-wrapper {
+            position: relative;
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .radial-dial-svg {
+            width: 54px;
+            height: 54px;
+            overflow: visible;
+        }
+
+        .radial-track {
+            fill: none;
+            stroke: var(--bg-surface-elevated);
+        }
+
+        .radial-progress {
+            fill: none;
+            stroke: var(--accent-blue);
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.4s ease;
+        }
+
+        .radial-dial-center {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .radial-dial-num {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+        }
+
+        .radial-dial-label {
+            font-size: 0.48rem;
+            font-weight: 800;
+            color: var(--accent-blue);
+            letter-spacing: 0.4px;
+            margin-top: 1px;
+        }
+
+        /* Secondary Navigation Tabs */
+        .terminal-tabs-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .terminal-tab-btn:hover {
+            color: #ffffff;
+            background: var(--bg-surface-hover);
+        }
+
+        .terminal-tab-btn.active {
+            color: #ffffff;
+            background: var(--accent-blue);
+        }
+
+        /* Settlement Badges */
+        .settlement-badge-won {
+            background: rgba(46, 240, 104, 0.15);
+            border: 1px solid rgba(46, 240, 104, 0.4);
+            color: #2EF068;
+            font-weight: 800;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .settlement-badge-lost {
+            background: rgba(224, 43, 55, 0.15);
+            border: 1px solid rgba(224, 43, 55, 0.4);
+            color: #ff6b72;
+            font-weight: 800;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .settlement-badge-pending {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            font-weight: 700;
+            font-size: 0.72rem;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Interactive "Why this pick" Accordion */
+        .why-accordion-btn {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border-subtle);
+            border-radius: 4px;
+            padding: 5px 10px;
+            color: var(--text-secondary);
+            font-size: 0.76rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .why-accordion-btn:hover {
+            color: var(--text-primary);
+            background: var(--bg-surface-hover);
+        }
+
+        .why-accordion-content {
+            display: none;
+            padding: 10px 12px;
+            background: var(--bg-page);
+            border: 1px solid var(--border-subtle);
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+        }
+        .why-accordion-content.show {
+            display: block;
+        }
+
+        /* Breadcrumb Button */
+        .btn-breadcrumb-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-breadcrumb-back:hover {
+            color: #ffffff;
+            border-color: var(--accent-blue);
+            background: var(--bg-surface-hover);
+        }
+
+        /* ==========================================================================
+           UPGRADED MODERN PREDICTION CARDS (3-COLUMN COMPACT TOOLKIT AESTHETIC)
+           ========================================================================== */
+        .predictions-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 1100px) {
+            .predictions-grid-layout {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 680px) {
+            .predictions-grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .predictions-panel-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .pred-grid-card {
+            background: #161D27 !important;
+            border: 1px solid var(--border-subtle) !important;
+            border-radius: 12px !important;
+            padding: 1.20rem !important;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+            user-select: none;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .pred-grid-card:hover {
+            border-color: var(--accent-blue) !important;
+            transform: translateY(-2px);
+            background: #1a2230 !important;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+        }
+
+        .pred-grid-card.in-slip,
+        .pred-grid-card.selected-edge-card {
+            border-color: var(--accent-blue) !important;
+            box-shadow: 0 0 16px rgba(35, 114, 245, 0.25) !important;
+            background: #192230 !important;
+        }
+
+        .tool-icon-wrapper {
+            width: 38px;
+            height: 38px;
+            border-radius: 9px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            flex-shrink: 0;
+        }
+
+        .pred-grid-card .pred-card-title {
+            font-size: 1.05rem !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            margin: 12px 0 6px 0 !important;
+            letter-spacing: -0.2px;
+            line-height: 1.3 !important;
+        }
+
+        .pred-grid-card .tool-desc {
+            font-size: 0.81rem;
+            color: var(--text-secondary);
+            line-height: 1.45;
+            margin-bottom: 14px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 52px;
+        }
+
+        .tool-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 8px;
+            margin-top: auto;
+        }
+
+        .btn-tool-action {
+            background: rgba(255, 255, 255, 0.06);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 6px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 4px 10px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+
+        .btn-tool-action:hover,
+        .pred-grid-card:hover .btn-tool-action {
+            background: var(--accent-blue);
+            border-color: var(--accent-blue);
+            color: #ffffff;
+        }
+
+        .btn-tool-action.added,
+        .pred-grid-card.in-slip .btn-tool-action {
+            background: var(--accent-blue) !important;
+            border-color: var(--accent-blue) !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(35, 114, 245, 0.35);
+        }
+
+        .card-premium-prediction {
+            background: #10151f !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            border-radius: 16px !important;
+            padding: 20px 22px !important;
+            margin-bottom: 1rem !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35) !important;
+            transition: border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease !important;
+            position: relative;
+        }
+
+        .card-premium-prediction:hover {
+            border-color: rgba(59, 130, 246, 0.35) !important;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        .pred-card-category {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #8c9ba8;
+            margin-bottom: 3px;
+            letter-spacing: 0.2px;
+        }
+
+        .card-premium-prediction .pred-card-title,
+        .card-premium-prediction .category-pred-title {
+            font-size: 1.25rem !important;
+            font-weight: 700 !important;
+            color: #ffffff !important;
+            letter-spacing: -0.2px !important;
+            line-height: 1.25 !important;
+            margin: 2px 0 10px 0 !important;
+        }
+
+        /* Pill Badges Row */
+        .pred-pill-badges-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 14px;
+        }
+
+        .pill-badge {
+            font-size: 0.74rem;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 3px 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            letter-spacing: 0.2px;
+            line-height: 1.4;
+        }
+
+        .pill-badge-high {
+            background: rgba(34, 197, 94, 0.14) !important;
+            color: #4ade80 !important;
+            border: 1px solid rgba(34, 197, 94, 0.28) !important;
+        }
+
+        .pill-badge-medium {
+            background: rgba(234, 179, 8, 0.14) !important;
+            color: #facc15 !important;
+            border: 1px solid rgba(234, 179, 8, 0.28) !important;
+        }
+
+        .pill-badge-value {
+            background: rgba(59, 130, 246, 0.14) !important;
+            color: #60a5fa !important;
+            border: 1px solid rgba(59, 130, 246, 0.28) !important;
+        }
+
+        .pill-badge-won {
+            background: rgba(34, 197, 94, 0.14) !important;
+            color: #4ade80 !important;
+            border: 1px solid rgba(34, 197, 94, 0.28) !important;
+        }
+
+        .pill-badge-settled {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        }
+
+        .pill-badge-slate {
+            background: rgba(255, 255, 255, 0.06) !important;
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255, 255, 255, 0.10) !important;
+        }
+
+        .pill-badge-edge {
+            background: rgba(147, 51, 234, 0.14) !important;
+            color: #c084fc !important;
+            border: 1px solid rgba(147, 51, 234, 0.28) !important;
+        }
+
+        /* Radial Dial Ring (Modern Circular Progress Gauge) */
+        .radial-ring-box {
+            position: relative;
+            width: 54px;
+            height: 54px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .radial-ring-svg {
+            width: 54px;
+            height: 54px;
+            overflow: visible;
+        }
+
+        .ring-bg-track {
+            fill: none;
+            stroke: #182232;
+        }
+
+        .ring-fg-progress {
+            fill: none;
+            stroke: #3b82f6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.6s ease;
+        }
+
+        .radial-ring-inner {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        .ring-val {
+            font-size: 0.94rem;
+            font-weight: 800;
+            color: #ffffff;
+            line-height: 1;
+            letter-spacing: -0.4px;
+        }
+
+        .ring-sub {
+            font-size: 0.62rem;
+            font-weight: 600;
+            color: #8c9ba8;
+            text-transform: lowercase;
+            margin-top: 1px;
+            line-height: 1;
+        }
+
+        /* Comparative Telemetry Bar (Expected Goals / Corners / Points) */
+        .expected-stat-telemetry {
+            margin: 14px 0 16px 0;
+        }
+
+        .stat-num-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .stat-num-val {
+            font-size: 1.30rem;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: -0.3px;
+        }
+
+        .stat-metric-title {
+            font-size: 0.86rem;
+            font-weight: 500;
+            color: #8c9ba8;
+        }
+
+        .dual-progress-capsule {
+            display: flex;
+            align-items: center;
+            height: 6px;
+            border-radius: 9999px;
+            background: rgba(255, 255, 255, 0.05);
+            gap: 8px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .dual-bar-left {
+            height: 100%;
+            border-radius: 9999px;
+            background: #5b6cf0;
+            transition: width 0.4s ease;
+        }
+
+        .dual-bar-right {
+            height: 100%;
+            border-radius: 9999px;
+            background: #f43f5e;
+            transition: width 0.4s ease;
+        }
+
+        .stat-subtext-projected {
+            font-size: 0.78rem;
+            color: #64748b;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        /* Likely Scores Grid */
+        .likely-scores-block {
+            margin: 14px 0;
+        }
+
+        .likely-scores-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #8c9ba8;
+            margin-bottom: 8px;
+        }
+
+        .likely-scores-chips {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 576px) {
+            .likely-scores-chips {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .score-chip {
+            background: #141a24;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 10px;
+            padding: 8px 4px;
+            text-align: center;
+            transition: all 0.15s ease;
+            cursor: default;
+        }
+
+        .score-chip.active-chip {
+            background: rgba(37, 99, 235, 0.15);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        .score-chip .chip-score {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: #ffffff;
+            display: block;
+            line-height: 1.2;
+        }
+
+        .score-chip.active-chip .chip-score {
+            color: #60a5fa;
+            font-weight: 800;
+        }
+
+        .score-chip .chip-pct {
+            font-size: 0.72rem;
+            color: #8c9ba8;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .likely-scores-subtext {
+            font-size: 0.76rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        /* Team Streaks / Insights Pills */
+        .stat-pills-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+
+        .stat-pill-item {
+            background: #141a24;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            padding: 5px 12px;
+            font-size: 0.76rem;
+            color: #cbd5e1;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-pill-flag {
+            font-size: 0.85rem;
+            display: inline-flex;
+        }
+
+        /* All lines in Bet builder CTA */
+        .bet-builder-cta {
+            background: rgba(30, 58, 138, 0.22);
+            border: 1px solid rgba(59, 130, 246, 0.28);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            text-decoration: none;
+            margin: 14px 0 10px 0;
+        }
+
+        .bet-builder-cta:hover {
+            background: rgba(30, 58, 138, 0.35);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        .bet-builder-cta .cta-icon,
+        .bet-builder-cta .cta-text,
+        .bet-builder-cta .cta-arrow {
+            color: #60a5fa;
+            font-size: 0.86rem;
+            font-weight: 600;
+        }
+
+        /* Interactive "Why this pick" Accordion */
+        .why-pick-accordion {
+            margin: 12px 0 10px 0;
+        }
+
+        .why-pick-toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            color: #3b82f6;
+            font-size: 0.86rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            cursor: pointer;
+            text-align: left;
+            transition: color 0.15s ease;
+        }
+
+        .why-pick-toggle:hover {
+            color: #60a5fa;
+        }
+
+        .why-pick-toggle .why-arrow {
+            font-size: 0.80rem;
+            transition: transform 0.2s ease;
+        }
+
+        .why-pick-toggle.active .why-arrow {
+            transform: rotate(180deg);
+        }
+
+        .why-pick-drawer {
+            display: none;
+            margin-top: 10px;
+            background: #141923;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-size: 0.84rem;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .why-pick-drawer.show {
+            display: block;
+        }
+
+        .why-ev-calc {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: 6px 10px;
+            font-size: 0.74rem;
+            color: #94a3b8;
+        }
+
+        .why-ev-calc code {
+            color: #38bdf8 !important;
+            background: none !important;
+            padding: 0 !important;
+        }
+
+        /* Action Slip Button (Vibrant Pill) */
+        .btn-action-slip {
+            width: 100%;
+            height: 44px;
+            background: #2563eb !important;
+            color: #ffffff !important;
+            border: none !important;
+            border-radius: 9999px !important;
+            font-size: 0.92rem;
+            font-weight: 700 !important;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-action-slip:hover {
+            background: #1d4ed8 !important;
+            box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+        }
+
+        .btn-action-slip.added {
+            background: #1e293b !important;
+            color: #94a3b8 !important;
+            border: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: none !important;
+        }
+
+        .btn-settled-result {
+            width: 100%;
+            height: 40px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .btn-settled-result.won {
+            background: rgba(34, 197, 94, 0.14);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            color: #4ade80;
+        }
+
+        .btn-settled-result.lost {
+            background: rgba(224, 43, 55, 0.12);
+            border: 1px solid rgba(224, 43, 55, 0.3);
+            color: #f87171;
+        }
+
+        .btn-settled-result.push {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.10);
+            color: #94a3b8;
+        }
+
+        /* ==========================================================================
+           CORRECT SCORE PRICES CARD (IMAGE 1 SPECIFICATION)
+           ========================================================================== */
+        .correct-score-prices-card {
+            background: #10151f;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px 22px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        .csp-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+        }
+
+        .csp-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+            letter-spacing: -0.2px;
+        }
+
+        .csp-bookmaker {
+            font-size: 0.90rem;
+            font-weight: 600;
+            color: #64748b;
+        }
+
+        .csp-grid-container {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        @media (max-width: 768px) {
+            .csp-grid-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .csp-tile {
+            background: #141a24;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 12px 6px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .csp-tile:hover {
+            background: #1a2230;
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .csp-tile.highlight-tile {
+            background: rgba(37, 99, 235, 0.16);
+            border-color: rgba(59, 130, 246, 0.45);
+        }
+
+        .csp-score-val {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: #ffffff;
+            line-height: 1.2;
+        }
+
+        .csp-tile.highlight-tile .csp-score-val {
+            color: #60a5fa;
+            font-weight: 800;
+        }
+
+        .csp-odds-val {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #ffffff;
+            margin: 3px 0;
+            line-height: 1.2;
+        }
+
+        .csp-chance-val {
+            font-size: 0.74rem;
+            color: #8c9ba8;
+            line-height: 1;
+        }
+
+        .csp-footer-note {
+            font-size: 0.82rem;
+            color: #64748b;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body class="bg-surface-canvas text-content-primary antialiased min-h-screen selection:bg-emerald-500/20 selection:text-emerald-400 font-sans">
+    <!-- Top Progress Bar for HTMX Transitions -->
+    <div id="page-loading-bar"></div>
+
+    <!-- Master Application Shell: Top Bar -->
+    <header class="app-header">
+        <div class="header-top-tier">
+            <!-- Minimalist PikMatrix Brand Mark -->
+            <a href="/matches"
+               hx-get="/matches"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="brand-wrapper"
+               title="PikMatrix Matches Terminal">
+                <div class="brand-icon-box">
+                    <i class="bi bi-cpu-fill"></i>
+                </div>
+                <div class="brand-title">PikMatrix</div>
+                <span class="brand-tag">AI 2.0</span>
+            </a>
+
+            <!-- Header Right Actions: Search Bar & Bet Slip -->
+            <div class="header-right-actions d-flex align-items-center gap-2">
+                <!-- XIAS Live Fixture & Entity Search Component -->
+                <div class="header-search-wrapper relative" id="headerSearchWrapper">
+                    <div class="relative flex items-center w-full">
+                        <!-- Strict Anti-Slop: Minimal inline SVG Search Icon -->
+                        <div class="absolute left-3 flex items-center pointer-events-none text-zinc-400 z-10">
+                            <svg class="w-4 h-4 text-zinc-400 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </div>
+
+                        <!-- 8-State Search Input with strict Tailwind Matrix -->
+                        <input type="text"
+                               id="headerSearchInput"
+                               name="q"
+                               role="combobox"
+                               aria-expanded="false"
+                               aria-autocomplete="list"
+                               aria-controls="searchResultsList"
+                               placeholder="Search clubs, fixtures, telemetry..."
+                               autocomplete="off"
+                               spellcheck="false"
+                               value="{{ search_query or '' }}"
+                               hx-get="/search"
+                               hx-trigger="keyup changed delay:250ms, search"
+                               hx-target="#searchResultsContent"
+                               hx-indicator="#searchLoadingIndicator, #searchSpinner"
+                               class="w-full pl-9 pr-20 py-1.5 h-[38px] text-xs sm:text-sm font-sans bg-zinc-900/90 text-zinc-100 placeholder:text-zinc-500 border border-zinc-800 rounded-lg hover:bg-zinc-900 hover:border-zinc-700 hover:text-white focus:outline-none focus:bg-zinc-950 focus:border-emerald-500/60 focus:ring-2 focus:ring-emerald-500/50 focus:ring-offset-2 focus:ring-offset-zinc-950 active:bg-zinc-950 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none data-[loading=true]:opacity-80 data-[loading=true]:cursor-wait aria-invalid:border-rose-500 aria-invalid:ring-rose-500/30 aria-invalid:text-rose-200 selection:bg-emerald-500/30 selection:text-emerald-100 transition-all duration-150">
+
+                        <!-- Right Actions inside Search Bar: Spinner, Clear, Badge -->
+                        <div class="absolute right-2.5 flex items-center gap-1.5 z-10">
+                            <!-- Strict Anti-Slop: Minimal inline SVG Loading Spinner -->
+                            <div id="searchSpinner" class="htmx-indicator hidden items-center justify-center">
+                                <svg class="animate-spin w-3.5 h-3.5 text-emerald-400 shrink-0" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                </svg>
+                            </div>
+
+                            <!-- Strict Anti-Slop: Minimal inline SVG Clear Button -->
+                            <button type="button"
+                                    id="searchClearBtn"
+                                    onclick="clearSearchInput();"
+                                    class="hidden items-center justify-center w-5 h-5 rounded hover:bg-zinc-800 text-zinc-400 hover:text-zinc-200 transition-colors focus:outline-none focus:ring-1 focus:ring-zinc-600"
+                                    title="Clear search query"
+                                    aria-label="Clear search input">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+
+                            <!-- Shortcut Badge -->
+                            <span class="search-shortcut-badge pointer-events-none hidden sm:inline-flex" id="searchShortcutBadge">Ctrl K</span>
+                        </div>
+                    </div>
+
+                    <!-- Elevated Floating Dropdown (Taste Layer: Terminal Aesthetic, No Single-Side Borders) -->
+                    <div id="searchResultsDropdown"
+                         class="hidden absolute right-0 top-full mt-2 w-[340px] sm:w-[420px] max-w-[90vw] z-50 bg-zinc-900 border border-zinc-800 rounded-xl shadow-2xl shadow-black/80 backdrop-blur-md overflow-hidden">
+                        
+                        <!-- Zero-CLS Loading Skeleton (Toggled via hx-indicator) -->
+                        <div id="searchLoadingIndicator" class="htmx-indicator p-3 space-y-3">
+                            <div class="flex items-center justify-between px-1">
+                                <div class="h-3 w-24 bg-zinc-800/80 rounded animate-pulse"></div>
+                                <div class="h-3 w-8 bg-zinc-800/60 rounded animate-pulse"></div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="h-11 px-3 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/60 flex items-center justify-between animate-pulse">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-full bg-zinc-800 shrink-0"></div>
+                                        <div class="h-3.5 w-28 bg-zinc-800 rounded"></div>
+                                    </div>
+                                    <div class="h-3 w-14 bg-zinc-800 rounded"></div>
+                                </div>
+                                <div class="h-11 px-3 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/60 flex items-center justify-between animate-pulse">
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="w-6 h-6 rounded-full bg-zinc-800 shrink-0"></div>
+                                        <div class="h-3.5 w-24 bg-zinc-800 rounded"></div>
+                                    </div>
+                                    <div class="h-3 w-12 bg-zinc-800 rounded"></div>
+                                </div>
+                            </div>
+
+                            <div class="border-t border-zinc-800/60 my-2"></div>
+
+                            <div class="flex items-center justify-between px-1">
+                                <div class="h-3 w-28 bg-zinc-800/80 rounded animate-pulse"></div>
+                                <div class="h-3 w-8 bg-zinc-800/60 rounded animate-pulse"></div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <div class="h-14 px-3 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/60 flex items-center justify-between animate-pulse">
+                                    <div class="space-y-1.5">
+                                        <div class="h-3.5 w-40 bg-zinc-800 rounded"></div>
+                                        <div class="h-3 w-24 bg-zinc-800/70 rounded"></div>
+                                    </div>
+                                    <div class="h-5 w-16 bg-zinc-800 rounded"></div>
+                                </div>
+                                <div class="h-14 px-3 py-2 rounded-lg border border-zinc-800/50 bg-zinc-900/60 flex items-center justify-between animate-pulse">
+                                    <div class="space-y-1.5">
+                                        <div class="h-3.5 w-36 bg-zinc-800 rounded"></div>
+                                        <div class="h-3 w-20 bg-zinc-800/70 rounded"></div>
+                                    </div>
+                                    <div class="h-5 w-16 bg-zinc-800 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Content Container targeted by HTMX -->
+                        <div id="searchResultsContent" class="max-h-[65vh] overflow-y-auto divide-y divide-zinc-800/60"></div>
+
+                        <!-- Dropdown Footer / Keyboard Navigation Legend -->
+                        <div class="px-3 py-2 bg-zinc-950 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400 select-none">
+                            <div class="flex items-center gap-2.5">
+                                <span class="flex items-center gap-1">
+                                    <kbd class="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px]">↑</kbd>
+                                    <kbd class="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px]">↓</kbd>
+                                    <span>Select</span>
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <kbd class="px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px]">↵</kbd>
+                                    <span>Open</span>
+                                </span>
+                            </div>
+                            <span class="flex items-center gap-1">
+                                <kbd class="px-1 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-[10px]">Esc</kbd>
+                                <span>Dismiss</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Welcome Greeting & Logout -->
+                {% if current_user %}
+                <div class="user-greeting-badge hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs text-zinc-400">
+                    <span>Welcome back,</span>
+                    <span class="text-white font-semibold">{{ current_user.username }}</span>
+                    <button hx-post="/api/logout" hx-target="body" hx-swap="none" class="btn btn-ghost p-0 ms-1 text-zinc-400 hover:text-rose-400 transition-colors" title="Log out" aria-label="Log out">
+                        <svg class="w-3.5 h-3.5 inline-block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15M12 9l3 3m0 0-3 3m3-3H9"/></svg>
+                    </button>
+                </div>
+                {% endif %}
+
+                <!-- Bet Slip Trigger Button -->
+                <button class="slip-header-btn" onclick="toggleBetSlip()" title="View Bet Slip">
+                    <i class="bi bi-receipt"></i>
+                    <span class="d-none d-sm-inline">Bet Slip</span>
+                    <span class="slip-count-badge" id="slipBadgeCount">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container for Modular Multi-Page Routing -->
+    <main id="app-content" class="app-content-container" hx-boost="true">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Global Drawer Container for Prediction Breakdowns & Modals -->
+    <div id="drawer-container"></div>
+
+    <!-- Desktop Floating Bottom Navigation Dock (md and up) -->
+    <div class="floating-dock-container hidden md:flex">
+        <nav class="app-bottom-nav" aria-label="Desktop Dock Navigation">
+            <a href="/matches"
+               hx-get="/matches"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="bottom-nav-item nav-item-matches {% if request.url.path in ['/', '/matches'] or '/match/' in request.url.path %}active{% endif %}"
+               id="nav-item-matches"
+               title="Matches Terminal">
+                <i class="bi bi-calendar-event"></i>
+                <span>Matches</span>
+            </a>
+            <a href="/tools"
+               hx-get="/tools"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="bottom-nav-item nav-item-tools {% if request.url.path == '/tools' %}active{% endif %}"
+               id="nav-item-tools"
+               title="Betting Tools">
+                <i class="bi bi-sliders"></i>
+                <span>Tools</span>
+            </a>
+            <a href="/track-record"
+               hx-get="/track-record"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="bottom-nav-item nav-item-dashboard nav-item-track-record {% if request.url.path in ['/track-record', '/ui/track-record', '/dashboard', '/ui/dashboard'] %}active{% endif %}"
+               id="nav-item-dashboard"
+               title="Automated Prediction Track Record">
+                <i class="bi bi-clock-history"></i>
+                <span>Track Record</span>
+            </a>
+            <a href="/profile"
+               hx-get="/profile"
+               hx-target="#app-content"
+               hx-push-url="true"
+               class="bottom-nav-item nav-item-profile {% if request.url.path == '/profile' %}active{% endif %}"
+               id="nav-item-profile"
+               title="User Profile (Amfo Ebenezer)">
+                <div class="bottom-nav-avatar">{% if user_initials %}{{ user_initials }}{% elif current_user and current_user.username and current_user.username != 'DemoBettor' %}{{ current_user.username[:2]|upper }}{% else %}AE{% endif %}</div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- XIAS Native Mobile Bottom Navigation (Mobile PWA Shell - Screens under md) -->
+    <nav class="fixed bottom-0 left-0 right-0 w-full z-50 bg-zinc-950/80 backdrop-blur-xl border-t border-zinc-800 pb-safe md:hidden flex items-center justify-around px-2 py-1 select-none"
+         aria-label="Mobile Main Navigation"
+         id="mobileBottomNav">
+        <!-- 1. Home Touch Target (Min 44x44px WCAG 2.2 Gate) -->
+        <a href="/matches"
+           hx-get="/matches"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors group {% if (request.url.path in ['/', '/matches'] or '/match/' in request.url.path) and not (request.query_params.get('filter') == 'live') %}text-emerald-400 font-bold{% endif %}"
+           aria-label="Home Matches">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span class="text-[10px] font-sans mt-0.5 tracking-tight">Home</span>
+        </a>
+
+        <!-- 2. Live Touch Target (Min 44x44px WCAG 2.2 Gate) -->
+        <a href="/matches?filter=live"
+           hx-get="/matches?filter=live"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors group relative {% if request.query_params.get('filter') == 'live' %}text-rose-400 font-bold{% endif %}"
+           aria-label="Live Fixtures">
+            <div class="relative flex items-center justify-center">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="2"></circle>
+                    <path d="M16.24 7.76a6 6 0 0 1 0 8.49m-8.48-.01a6 6 0 0 1 0-8.49m11.31-2.82a10 10 0 0 1 0 14.14m-14.14 0a10 10 0 0 1 0-14.14"></path>
+                </svg>
+                <span class="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
+            </div>
+            <span class="text-[10px] font-sans mt-0.5 tracking-tight">Live</span>
+        </a>
+
+        <!-- 3. Value Scanner Touch Target (Min 44x44px WCAG 2.2 Gate) -->
+        <a href="/tools"
+           hx-get="/tools"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors group {% if request.url.path == '/tools' %}text-emerald-400 font-bold{% endif %}"
+           aria-label="Value Scanner Tools">
+            <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <line x1="4" y1="21" x2="4" y2="14"></line>
+                <line x1="4" y1="10" x2="4" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12" y2="3"></line>
+                <line x1="20" y1="21" x2="20" y2="16"></line>
+                <line x1="20" y1="12" x2="20" y2="3"></line>
+                <line x1="1" y1="14" x2="7" y2="14"></line>
+                <line x1="9" y1="8" x2="15" y2="8"></line>
+                <line x1="17" y1="16" x2="23" y2="16"></line>
+            </svg>
+            <span class="text-[10px] font-sans mt-0.5 tracking-tight">Value Scanner</span>
+        </a>
+
+        <!-- 4. Profile Touch Target (Min 44x44px WCAG 2.2 Gate) -->
+        <a href="/profile"
+           hx-get="/profile"
+           hx-target="#app-content"
+           hx-push-url="true"
+           class="flex flex-col items-center justify-center min-h-[44px] min-w-[44px] px-3 py-1 rounded-lg text-zinc-400 hover:text-white transition-colors group {% if request.url.path == '/profile' %}text-emerald-400 font-bold{% endif %}"
+           aria-label="User Profile">
+            <div class="w-5 h-5 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[9px] font-mono font-bold text-zinc-300">
+                {% if user_initials %}{{ user_initials }}{% elif current_user and current_user.username and current_user.username != 'DemoBettor' %}{{ current_user.username[:2]|upper }}{% else %}AE{% endif %}
+            </div>
+            <span class="text-[10px] font-sans mt-0.5 tracking-tight">Profile</span>
+        </a>
+    </nav>
+
+    <!-- Slide-over Bet Slip Drawer -->
+    <div class="slip-overlay" id="slipOverlay" onclick="toggleBetSlip()"></div>
+    <div class="slip-drawer" id="slipDrawer">
+        <div class="slip-drawer-header">
+            <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-receipt fs-5" style="color: var(--accent-blue);"></i>
+                <h6 class="m-0 fw-bold text-white">Your Bet Slip</h6>
+            </div>
+            <button class="btn btn-sm btn-link text-secondary p-0" onclick="toggleBetSlip()">
+                <i class="bi bi-x-lg fs-6"></i>
+            </button>
+        </div>
+        <div class="slip-drawer-body" id="slipItemsList">
+            <div class="empty-view-box">
+                <i class="bi bi-cart-x fs-1 text-secondary d-block mb-2"></i>
+                <p class="small text-secondary">Your slip is currently empty.<br>Click "+ Add To Slip" on any prediction card.</p>
+            </div>
+        </div>
+        <div class="slip-drawer-footer">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="small text-secondary">Total Selections:</span>
+                <span class="mono fw-bold text-white" id="slipFooterCount">0</span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <span class="small text-secondary">Est. Combined Odds:</span>
+                <span class="mono fw-bold" style="color: var(--accent-blue);" id="slipCombinedOdds">1.00</span>
+            </div>
+            <button class="btn btn-sm w-100 text-white fw-bold mb-2"
+                    style="background: var(--accent-blue); padding: 0.5rem 1rem;"
+                    onclick="copySlipToClipboard()">
+                <i class="bi bi-clipboard-check me-1"></i> Copy Picks Summary
+            </button>
+            <button class="btn btn-sm btn-outline-secondary w-100" style="font-size: 0.75rem;" onclick="clearBetSlip()">
+                Clear Slip
+            </button>
+        </div>
+    </div>
+
+    <!-- Bet Slip & Dynamic State JavaScript -->
+    <script>
+        window.betSlip = JSON.parse(localStorage.getItem('pikmatrix_betslip') || '[]');
+
+        function updateSlipBadge() {
+            const count = window.betSlip.length;
+            const badge = document.getElementById('slipBadgeCount');
+            const footerCount = document.getElementById('slipFooterCount');
+            if (badge) badge.innerText = count;
+            if (footerCount) footerCount.innerText = count;
+            renderSlipItems();
+        }
+
+        function toggleBetSlip() {
+            const drawer = document.getElementById('slipDrawer');
+            const overlay = document.getElementById('slipOverlay');
+            if (!drawer || !overlay) return;
+            drawer.classList.toggle('open');
+            overlay.classList.toggle('open');
+        }
+
+        function addToSlip(predId, matchId, selection, marketType, prob, riskLevel, odds) {
+            const existing = window.betSlip.find(i => String(i.predId) === String(predId));
+            if (existing) {
+                removeFromSlip(predId);
+                return;
+            }
+            window.betSlip.push({
+                predId: String(predId),
+                matchId: matchId,
+                selection: selection,
+                marketType: marketType,
+                prob: prob || 85,
+                riskLevel: riskLevel || 'Low Risk',
+                odds: odds || '1.85'
+            });
+            localStorage.setItem('pikmatrix_betslip', JSON.stringify(window.betSlip));
+            updateSlipBadge();
+
+            const btn = document.getElementById('btnSlip-' + predId);
+            if (btn) {
+                btn.classList.add('added');
+                if (btn.classList.contains('btn-tool-action')) {
+                    btn.innerHTML = 'Open <i class="bi bi-arrow-right-short"></i>';
+                } else {
+                    btn.innerHTML = '<i class="bi bi-check2"></i> <span>Added to Slip</span>';
+                }
+                const card = btn.closest('.pred-grid-card') || btn.closest('.market-card');
+                if (card) {
+                    card.classList.add('in-slip');
+                    card.classList.add('selected-edge-card');
+                }
+            }
+        }
+
+        function removeFromSlip(predId) {
+            window.betSlip = window.betSlip.filter(i => String(i.predId) !== String(predId));
+            localStorage.setItem('pikmatrix_betslip', JSON.stringify(window.betSlip));
+            updateSlipBadge();
+
+            const btn = document.getElementById('btnSlip-' + predId);
+            if (btn) {
+                btn.classList.remove('added');
+                if (btn.classList.contains('btn-tool-action')) {
+                    btn.innerHTML = 'Launch <i class="bi bi-arrow-right-short"></i>';
+                } else {
+                    btn.innerHTML = '<i class="bi bi-plus-lg"></i> <span>+ Add To Slip</span>';
+                }
+                const card = btn.closest('.pred-grid-card') || btn.closest('.market-card');
+                if (card) {
+                    card.classList.remove('in-slip');
+                    card.classList.remove('selected-edge-card');
+                }
+            }
+        }
+
+        function clearBetSlip() {
+            window.betSlip = [];
+            localStorage.removeItem('pikmatrix_betslip');
+            updateSlipBadge();
+            document.querySelectorAll('.btn-add-slip-wide.added, .btn-tool-action.added').forEach(btn => {
+                btn.classList.remove('added');
+                if (btn.classList.contains('btn-tool-action')) {
+                    btn.innerHTML = 'Launch <i class="bi bi-arrow-right-short"></i>';
+                } else {
+                    btn.innerHTML = '<i class="bi bi-plus-lg"></i> <span>+ Add To Slip</span>';
+                }
+            });
+            document.querySelectorAll('.pred-grid-card.in-slip, .market-card.selected-edge-card').forEach(card => {
+                card.classList.remove('in-slip');
+                card.classList.remove('selected-edge-card');
+            });
+        }
+
+        function renderSlipItems() {
+            const list = document.getElementById('slipItemsList');
+            const oddsEl = document.getElementById('slipCombinedOdds');
+            if (!list) return;
+
+            if (window.betSlip.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-view-box">
+                        <i class="bi bi-cart-x fs-1 text-secondary d-block mb-2"></i>
+                        <p class="small text-secondary">Your slip is currently empty.<br>Click "+ Add To Slip" on any prediction card.</p>
+                    </div>
+                `;
+                if (oddsEl) oddsEl.innerText = "1.00";
+                return;
+            }
+
+            let combinedOdds = 1.0;
+            let html = "";
+            window.betSlip.forEach(item => {
+                const dec = parseFloat(item.odds) || 1.85;
+                combinedOdds *= dec;
+                html += `
+                    <div class="slip-item-card">
+                        <button class="slip-item-remove" onclick="removeFromSlip('${item.predId}')" title="Remove">
+                            <i class="bi bi-trash3"></i>
+                        </button>
+                        <div class="small fw-bold text-white mb-1 pe-4">${item.selection}</div>
+                        <div class="d-flex align-items-center justify-content-between small text-secondary">
+                            <span>${item.marketType}</span>
+                            <span class="mono fw-bold" style="color: var(--accent-blue);">${item.odds}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+            if (oddsEl) oddsEl.innerText = combinedOdds.toFixed(2);
+        }
+
+        function copySlipToClipboard() {
+            if (window.betSlip.length === 0) return;
+            const text = window.betSlip.map(i => `• ${i.selection} (${i.marketType}) @ ${i.odds}`).join('\n');
+            navigator.clipboard.writeText(`PikMatrix Picks:\n${text}`);
+            alert('Picks copied to clipboard!');
+        }
+
+        // Toggle Why Accordion with smooth reveal
+        function toggleWhyAccordion(id) {
+            const el = document.getElementById(id);
+            if (!el) return;
+            const wasClosed = !el.classList.contains('show');
+            el.classList.toggle('show');
+            const btn = el.previousElementSibling;
+            if (btn) {
+                btn.classList.toggle('active');
+            }
+            if (wasClosed) {
+                setTimeout(() => {
+                    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 100);
+            }
+        }
+
+        // Toggle League Group Collapsible Accordion
+        function toggleLeagueGroup(headerEl, contentId) {
+            const content = document.getElementById(contentId);
+            if (!content) return;
+            content.classList.toggle('collapsed-content');
+            headerEl.classList.toggle('collapsed');
+        }
+
+        // Switch Terminal Tabs (Predictions, Head-to-Head, Statistics)
+        function switchTerminalTab(tabId) {
+            document.querySelectorAll('.terminal-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.terminal-tab-pane').forEach(p => p.style.display = 'none');
+            const targetBtn = document.getElementById('tab-btn-' + tabId);
+            const targetPane = document.getElementById('tab-pane-' + tabId);
+            if (targetBtn) targetBtn.classList.add('active');
+            if (targetPane) targetPane.style.display = 'block';
+            if (targetPane && window.pageYOffset > 180) {
+                const nav = document.querySelector('.terminal-tabs-nav');
+                if (nav) {
+                    const topPos = nav.getBoundingClientRect().top + window.pageYOffset - 72;
+                    window.scrollTo({ top: Math.max(0, topPos), behavior: 'smooth' });
+                }
+            }
+        }
+
+        function switchActiveSportPill(sportKey) {
+            document.querySelectorAll('.sofa-sport-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            const target = document.getElementById('sport-pill-' + sportKey);
+            if (target) {
+                target.classList.add('active');
+                target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        function syncSportPillsFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentSport = (urlParams.get('sport') || 'all').toLowerCase().trim();
+            const activeSport = (currentSport === 'all' || !currentSport) ? 'all' : currentSport;
+            document.querySelectorAll('.sofa-sport-pill').forEach(pill => {
+                pill.classList.remove('active');
+            });
+            const activeSportPill = document.getElementById('sport-pill-' + activeSport);
+            if (activeSportPill) {
+                activeSportPill.classList.add('active');
+                activeSportPill.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            }
+        }
+
+        window.addEventListener('popstate', syncSportPillsFromUrl);
+        document.addEventListener('DOMContentLoaded', syncSportPillsFromUrl);
+        document.addEventListener('htmx:pushedIntoHistory', syncSportPillsFromUrl);
+
+        // Smooth horizontal mousewheel scroll for pill strips & horizontal carousels
+        function enableHorizontalWheelScroll() {
+            const horizontalSelectors = [
+                '.header-sub-tier',
+                '.date-filter-scroll',
+                '.tools-category-nav',
+                '.sofa-tab-bar',
+                '.sofa-calendar-strip',
+                '.sports-nav-group',
+                '.overflow-x-auto'
+            ];
+            horizontalSelectors.forEach(sel => {
+                document.querySelectorAll(sel).forEach(el => {
+                    if (el._wheelAttached) return;
+                    el._wheelAttached = true;
+                    el.addEventListener('wheel', function(e) {
+                        if (Math.abs(e.deltaY) > Math.abs(e.deltaX) && el.scrollWidth > el.clientWidth) {
+                            e.preventDefault();
+                            el.scrollBy({
+                                left: e.deltaY * 1.3,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, { passive: false });
+                });
+            });
+        }
+
+        // Global smooth scroll to element helper with sticky header offset
+        window.smoothScrollTo = function(target, offset = 96) {
+            const el = typeof target === 'string' ? document.querySelector(target) : target;
+            if (!el) return;
+            const elementPosition = el.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - offset;
+            window.scrollTo({
+                top: Math.max(0, offsetPosition),
+                behavior: 'smooth'
+            });
+        };
+
+        // Smooth in-page anchor navigation handler
+        document.addEventListener('click', function(e) {
+            const anchor = e.target.closest('a[href^="#"]');
+            if (!anchor) return;
+            const href = anchor.getAttribute('href');
+            if (!href || href === '#' || href.startsWith('#tab-') || anchor.hasAttribute('data-bs-toggle')) return;
+            
+            const targetEl = document.querySelector(href);
+            if (targetEl) {
+                e.preventDefault();
+                window.smoothScrollTo(targetEl, 96);
+            }
+        });
+
+        // HTMX After Swap Hook: sync betslip button states and active bottom nav
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            updateSlipBadge();
+            syncSportPillsFromUrl();
+            enableHorizontalWheelScroll();
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPath || (href === '/matches' && currentPath === '/') || (href === '/matches' && currentPath.startsWith('/match/'))) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+            // Re-sync added buttons
+            window.betSlip.forEach(item => {
+                const btn = document.getElementById('btnSlip-' + item.predId);
+                if (btn) {
+                    btn.classList.add('added');
+                    if (btn.classList.contains('btn-tool-action')) {
+                        btn.innerHTML = 'Open <i class="bi bi-arrow-right-short"></i>';
+                    } else {
+                        btn.innerHTML = '<i class="bi bi-check2"></i> <span>Added to Slip</span>';
+                    }
+                }
+            });
+        });
+
+        // XIAS Keyboard Navigation & Live Search Controller (WCAG 2.2 Compliant)
+        function initXiasSearch() {
+            const searchInput = document.getElementById('headerSearchInput');
+            const dropdown = document.getElementById('searchResultsDropdown');
+            const resultsContent = document.getElementById('searchResultsContent');
+            const clearBtn = document.getElementById('searchClearBtn');
+            const shortcutBadge = document.getElementById('searchShortcutBadge');
+            const searchWrapper = document.getElementById('headerSearchWrapper');
+
+            if (!searchInput || !dropdown) return;
+
+            let selectedIndex = -1;
+
+            function openDropdown() {
+                dropdown.classList.remove('hidden');
+                searchInput.setAttribute('aria-expanded', 'true');
+            }
+
+            function closeDropdown() {
+                dropdown.classList.add('hidden');
+                searchInput.setAttribute('aria-expanded', 'false');
+                searchInput.removeAttribute('aria-activedescendant');
+                selectedIndex = -1;
+                clearSelectedOption();
+            }
+
+            window.closeSearchDropdown = closeDropdown;
+
+            function clearSelectedOption() {
+                const options = resultsContent.querySelectorAll('[role="option"]');
+                options.forEach(opt => {
+                    opt.setAttribute('aria-selected', 'false');
+                    opt.classList.remove('bg-zinc-800', 'border-zinc-700', 'text-white');
+                });
+            }
+
+            function updateSelectedOption(newIndex) {
+                const options = resultsContent.querySelectorAll('[role="option"]');
+                if (options.length === 0) return;
+
+                clearSelectedOption();
+
+                if (newIndex >= 0 && newIndex < options.length) {
+                    selectedIndex = newIndex;
+                    const activeOption = options[selectedIndex];
+                    activeOption.setAttribute('aria-selected', 'true');
+                    activeOption.classList.add('bg-zinc-800', 'border-zinc-700', 'text-white');
+                    searchInput.setAttribute('aria-activedescendant', activeOption.id);
+                    activeOption.scrollIntoView({ block: 'nearest' });
+                } else {
+                    selectedIndex = -1;
+                    searchInput.removeAttribute('aria-activedescendant');
+                }
+            }
+
+            function syncClearButton() {
+                const hasText = searchInput.value.trim().length > 0;
+                if (clearBtn) {
+                    clearBtn.classList.toggle('hidden', !hasText);
+                    clearBtn.classList.toggle('flex', hasText);
+                }
+                if (shortcutBadge) {
+                    shortcutBadge.classList.toggle('sm:inline-flex', !hasText);
+                    shortcutBadge.classList.toggle('hidden', hasText);
+                }
+            }
+
+            window.clearSearchInput = function() {
+                searchInput.value = '';
+                syncClearButton();
+                searchInput.focus();
+                closeDropdown();
+            };
+
+            window.setSearchQuery = function(term) {
+                searchInput.value = term;
+                syncClearButton();
+                searchInput.focus();
+                openDropdown();
+                if (window.htmx) {
+                    htmx.ajax('GET', '/search?q=' + encodeURIComponent(term), {
+                        target: '#searchResultsContent',
+                        indicator: '#searchLoadingIndicator, #searchSpinner'
+                    });
+                }
+            };
+
+            // Input Events
+            searchInput.addEventListener('input', function() {
+                syncClearButton();
+                if (this.value.trim().length > 0) {
+                    openDropdown();
+                }
+            });
+
+            searchInput.addEventListener('focus', function() {
+                syncClearButton();
+                openDropdown();
+                if (!resultsContent.innerHTML.trim() && window.htmx) {
+                    htmx.ajax('GET', '/search', {
+                        target: '#searchResultsContent',
+                        indicator: '#searchLoadingIndicator, #searchSpinner'
+                    });
+                }
+            });
+
+            // Keyboard Navigation (ArrowDown, ArrowUp, Enter, Escape)
+            searchInput.addEventListener('keydown', function(e) {
+                const options = resultsContent.querySelectorAll('[role="option"]');
+
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (dropdown.classList.contains('hidden')) {
+                        openDropdown();
+                        return;
+                    }
+                    if (options.length > 0) {
+                        const nextIndex = selectedIndex < options.length - 1 ? selectedIndex + 1 : 0;
+                        updateSelectedOption(nextIndex);
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (dropdown.classList.contains('hidden')) {
+                        openDropdown();
+                        return;
+                    }
+                    if (options.length > 0) {
+                        const prevIndex = selectedIndex > 0 ? selectedIndex - 1 : options.length - 1;
+                        updateSelectedOption(prevIndex);
+                    }
+                } else if (e.key === 'Enter') {
+                    if (selectedIndex >= 0 && options[selectedIndex]) {
+                        e.preventDefault();
+                        options[selectedIndex].click();
+                        closeDropdown();
+                    }
+                } else if (e.key === 'Escape') {
+                    e.preventDefault();
+                    closeDropdown();
+                    searchInput.blur();
+                }
+            });
+
+            // Close on click outside
+            document.addEventListener('click', function(e) {
+                if (searchWrapper && !searchWrapper.contains(e.target)) {
+                    closeDropdown();
+                }
+            });
+
+            // Reset selection after HTMX swaps results
+            document.body.addEventListener('htmx:afterSwap', function(evt) {
+                if (evt.detail.target && evt.detail.target.id === 'searchResultsContent') {
+                    selectedIndex = -1;
+                    if (searchInput.value.trim().length > 0 || !dropdown.classList.contains('hidden')) {
+                        openDropdown();
+                    }
+                }
+            });
+
+            syncClearButton();
+        }
+
+        // Global Ctrl+K / Cmd+K search focus handler
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+                e.preventDefault();
+                const searchInput = document.getElementById('headerSearchInput');
+                if (searchInput) {
+                    searchInput.focus();
+                    searchInput.select();
+                }
+            }
+        });
+
+        // Toggle 5-Day Sofascore Calendar Strip
+        function toggleCalendarStrip() {
+            const strip = document.getElementById('sofaCalendarStrip');
+            const btn = document.getElementById('sofaCalendarToggleBtn');
+            if (strip) {
+                if (strip.style.display === 'none') {
+                    strip.style.display = 'flex';
+                    if (btn) btn.classList.add('active');
+                } else {
+                    strip.style.display = 'none';
+                    if (btn) btn.classList.remove('active');
+                }
+            }
+        }
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            initXiasSearch();
+            updateSlipBadge();
+            enableHorizontalWheelScroll();
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.bottom-nav-item').forEach(item => {
+                const href = item.getAttribute('href');
+                if (href === currentPath || (href === '/matches' && currentPath === '/') || (href === '/matches' && currentPath.startsWith('/match/'))) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        });
+    </script>
+    <script src="/static/js/components.js"></script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

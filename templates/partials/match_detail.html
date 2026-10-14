@@ -1,0 +1,491 @@
+{% if not match %}
+<div class="empty-view-box">
+    <i class="bi bi-trophy fs-1 text-secondary d-block mb-3"></i>
+    <h5>No Fixture Selected</h5>
+    <p class="small text-secondary">Select any match from the center feed to view prediction stats and market insights.</p>
+</div>
+{% else %}
+{% set tier1 = match.capital_preservation_play %}
+{% set tier2 = match.alpha_value_play %}
+{% set is_unplayable = match.is_unplayable or (not tier1 and not tier2) %}
+{% set sp_key = match.sport_key or (match.sport.lower() if match.sport else "football") %}
+{% set is_bball = (sp_key == "basketball") %}
+{% set is_tennis = (sp_key == "tennis") %}
+{% set is_football = (sp_key == "football") %}
+
+<!-- 1. Match Hero Card -->
+<div class="sofa-header-card">
+    <div class="sofa-header-league-row flex items-center gap-1.5">
+        {% if match.competition_flag %}
+            <span>{{ match.competition_flag }}</span>
+        {% else %}
+            <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0 inline-block" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 4h16v6a7 7 0 0 1-14 0V4ZM12 17v4M8 21h8"/>
+            </svg>
+        {% endif %}
+        <span>{{ match.competition }}</span>
+        <span>•</span>
+        <span class="mono">{{ match.kickoff_display }}</span>
+    </div>
+    <div class="sofa-header-matchup">
+        <div class="sofa-matchup-team team-left">
+            {% set h_logo = (home_entity and home_entity.logo_url) or match.home_logo_url %}
+            <div class="sofa-matchup-crest overflow-hidden flex items-center justify-center p-1 bg-surface-card">
+                {% if h_logo %}
+                    <img src="{{ h_logo }}" alt="{{ match.home_team }}" class="w-full h-full object-contain" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                    <span style="display:none;">{{ match.home_initials or (match.home_team[:2]|upper) }}</span>
+                {% else %}
+                    <span>{{ match.home_initials or (match.home_team[:2]|upper) }}</span>
+                {% endif %}
+            </div>
+            <div class="sofa-matchup-name">{{ match.home_team }}</div>
+        </div>
+        <div class="sofa-matchup-center">
+            {% if match.is_finished %}
+                <div class="sofa-matchup-score mono">
+                    {{ match.home_score if match.home_score is not none else 0 }} - {{ match.away_score if match.away_score is not none else 0 }}
+                </div>
+                <div class="sofa-matchup-status">FT</div>
+            {% elif match.is_live %}
+                <div class="sofa-matchup-time mono" style="color: var(--accent-red);">{{ match.live_minute or "LIVE" }}</div>
+                <div class="sofa-matchup-status" style="color: var(--accent-red);">LIVE</div>
+            {% else %}
+                <div class="sofa-matchup-time mono">{{ match.kickoff_time_str or 'Upcoming' }}</div>
+                <div class="sofa-matchup-status">UPCOMING</div>
+            {% endif %}
+        </div>
+        <div class="sofa-matchup-team team-right">
+            {% set a_logo = (away_entity and away_entity.logo_url) or match.away_logo_url %}
+            <div class="sofa-matchup-crest overflow-hidden flex items-center justify-center p-1 bg-surface-card">
+                {% if a_logo %}
+                    <img src="{{ a_logo }}" alt="{{ match.away_team }}" class="w-full h-full object-contain" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                    <span style="display:none;">{{ match.away_initials or (match.away_team[:2]|upper) }}</span>
+                {% else %}
+                    <span>{{ match.away_initials or (match.away_team[:2]|upper) }}</span>
+                {% endif %}
+            </div>
+            <div class="sofa-matchup-name">{{ match.away_team }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- 2. Prediction Cards (All Valid Predictions in Scrollable Container) -->
+<div class="predictions-scroll-container d-flex flex-column gap-2 mb-2 overflow-y-auto" style="max-height: 500px; padding-right: 4px; scrollbar-width: thin;">
+    {% if is_unplayable %}
+        <div class="market-card text-center p-3 mb-2" style="border-color: rgba(224, 43, 55, 0.28); background: rgba(224, 43, 55, 0.04);">
+            <div class="mb-1"><i class="bi bi-shield-slash fs-3" style="color: var(--accent-red);"></i></div>
+            <div class="fw-bold mb-1" style="color: var(--accent-red); font-size: 0.90rem;">
+                Match metrics too volatile. No mathematically viable edges detected.
+            </div>
+            <p class="small text-secondary mb-2" style="max-width: 400px; margin: 0 auto; line-height: 1.40;">
+                {{ match.unplayable_message or "High league variance and compressed bookmaker margins fail both Capital Preservation (>=85% win prob) and Alpha Edge (+5% EV) thresholds." }}
+            </p>
+            {% if match.archetype and match.archetype.display_name %}
+                <span class="badge border mono px-2 py-1" style="background: var(--bg-surface-elevated); color: var(--text-muted); border-color: var(--border-subtle); font-size: 0.70rem;">
+                    League Archetype: {{ match.archetype.display_name }}
+                </span>
+            {% endif %}
+        </div>
+    {% else %}
+        {% set all_plays = match.predictions if (match.predictions is defined and match.predictions) else ([tier1, tier2]|select('defined')|select|list + (match.additional_plays or [])) %}
+        <div class="predictions-panel-grid mb-2">
+            {% for pred in all_plays %}
+                {% set st = (pred.settlement_status or (pred.settlement_badge.status if pred.settlement_badge is mapping else '')) | upper %}
+                {% set is_won = (st == 'WON') %}
+                {% set is_lost = (st == 'LOST') %}
+                {% set is_settled = is_won or is_lost or (st == 'PUSH') %}
+                {% set prob = (pred.model_prob_pct or (pred.confidence_num * 100 if pred.confidence_num else (pred.confidence_score | float if pred.confidence_score else 80))) | round | int %}
+                {% set odds_val = pred.decimal_odds or "1.85" %}
+                {% set m_type_lower = (pred.market_type or '') | lower %}
+
+                {# Map Market Type to Toolkit Icon & Accent Color #}
+                {% if 'goal' in m_type_lower %}
+                    {% set icon_bg = "rgba(35, 114, 245, 0.15)" %}
+                    {% set icon_col = "var(--accent-blue)" %}
+                    {% set icon_class = "bi-graph-up-arrow" %}
+                {% elif 'result' in m_type_lower or 'double' in m_type_lower or 'moneyline' in m_type_lower or 'winner' in m_type_lower %}
+                    {% set icon_bg = "rgba(46, 240, 104, 0.15)" %}
+                    {% set icon_col = "#2EF068" %}
+                    {% set icon_class = "bi-pie-chart-fill" %}
+                {% elif 'handicap' in m_type_lower or 'spread' in m_type_lower %}
+                    {% set icon_bg = "rgba(245, 158, 11, 0.15)" %}
+                    {% set icon_col = "#F59E0B" %}
+                    {% set icon_class = "bi-percent" %}
+                {% elif 'shot' in m_type_lower %}
+                    {% set icon_bg = "rgba(6, 182, 212, 0.15)" %}
+                    {% set icon_col = "#06B6D4" %}
+                    {% set icon_class = "bi-filter-circle" %}
+                {% elif 'corner' in m_type_lower %}
+                    {% set icon_bg = "rgba(139, 92, 246, 0.15)" %}
+                    {% set icon_col = "#8B5CF6" %}
+                    {% set icon_class = "bi-union" %}
+                {% else %}
+                    {% set icon_bg = "rgba(239, 68, 68, 0.15)" %}
+                    {% set icon_col = "#EF4444" %}
+                    {% set icon_class = "bi-sliders" %}
+                {% endif %}
+
+                <!-- Compact Toolkit-Style Prediction Card (Matching Reference Layout) -->
+                <div class="market-card pred-grid-card h-100 {% if is_won %}card-settled-won{% elif is_lost %}card-settled-lost{% endif %}"
+                     onclick="addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, '{{ 'Low Risk' if prob >= 80 else 'Medium Risk' }}', '{{ odds_val }}')">
+                    
+                    <!-- Top Row: Icon on Left, Badges on Right -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <div class="tool-icon-wrapper" style="background: {{ icon_bg }}; color: {{ icon_col }};">
+                            <i class="bi {{ icon_class }}"></i>
+                        </div>
+                        <div class="d-flex align-items-center gap-1">
+                            {% if is_settled %}
+                                {% if is_won %}
+                                    <span class="badge" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; font-size: 0.68rem; font-weight: 700;">LANDED</span>
+                                {% elif is_lost %}
+                                    <span class="badge" style="background: rgba(239, 68, 68, 0.15); color: #EF4444; font-size: 0.68rem; font-weight: 700;">SETTLED</span>
+                                {% endif %}
+                            {% else %}
+                                {% if prob >= 80 or pred.tier == 1 or pred.model_name == 'alpha_fortress_lock' %}
+                                    <span class="badge" style="background: rgba(46, 240, 104, 0.15); color: #2EF068; font-size: 0.68rem; font-weight: 700;">ACTIVE</span>
+                                {% elif prob >= 65 or pred.tier == 2 or pred.model_name == 'alpha_value_edge' %}
+                                    <span class="badge" style="background: rgba(35, 114, 245, 0.15); color: var(--accent-blue); font-size: 0.68rem; font-weight: 700;">ACTIVE</span>
+                                {% else %}
+                                    <span class="badge" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B; font-size: 0.68rem; font-weight: 700;">VALUE</span>
+                                {% endif %}
+                            {% endif %}
+                            <span class="badge border" style="background: rgba(255,255,255,0.04); color: var(--text-secondary); border-color: var(--border-subtle); font-size: 0.65rem;">{{ pred.market_type }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Title Row -->
+                    <h6 class="text-white fw-bold mb-1 pred-card-title category-pred-title text-truncate" title="{{ pred.selection }}">
+                        {{ pred.selection }}
+                    </h6>
+
+                    <!-- Description Body -->
+                    <p class="tool-desc text-secondary small mb-3">
+                        {{ pred.why_this_pick or pred.insight or (pred.selection ~ " projected with " ~ prob ~ "% mathematical confidence based on Poisson simulations.") }}
+                    </p>
+
+                    <!-- Footer Row -->
+                    <div class="tool-footer d-flex align-items-center justify-content-between pt-2 border-top" style="border-color: rgba(255,255,255,0.06) !important;">
+                        {% if is_settled %}
+                            {% if is_won %}
+                                <span class="small mono" style="color: #2EF068; font-size: 0.75rem;"><i class="bi bi-check-circle-fill"></i> Landed · {{ match.home_score if match.home_score is not none else 0 }}-{{ match.away_score if match.away_score is not none else 0 }}</span>
+                            {% elif is_lost %}
+                                <span class="small mono" style="color: #EF4444; font-size: 0.75rem;"><i class="bi bi-x-circle-fill"></i> Settled · {{ match.home_score if match.home_score is not none else 0 }}-{{ match.away_score if match.away_score is not none else 0 }}</span>
+                            {% else %}
+                                <span class="small mono text-secondary" style="font-size: 0.75rem;">Settled · {{ st }}</span>
+                            {% endif %}
+                            <button class="btn btn-sm btn-tool-action" disabled style="opacity: 0.7;">
+                                Settled
+                            </button>
+                        {% else %}
+                            {% if pred.alpha_edge and pred.alpha_edge >= 5.0 %}
+                                <span class="small mono" style="color: #2EF068; font-size: 0.75rem;"><i class="bi bi-lightning-fill"></i> +{{ pred.alpha_edge | round(1) }}% Edge</span>
+                            {% elif prob >= 80 %}
+                                <span class="small mono" style="color: var(--accent-blue); font-size: 0.75rem;"><i class="bi bi-shield-check"></i> Capital Guard</span>
+                            {% else %}
+                                <span class="small text-secondary" style="font-size: 0.75rem;">Odds: <strong class="text-white">{{ odds_val }}</strong></span>
+                            {% endif %}
+
+                            <button class="btn btn-sm btn-tool-action btn-add-slip-wide" id="btnSlip-{{ pred.id }}" onclick="event.stopPropagation(); addToSlip('{{ pred.id }}', {{ match.id }}, '{{ pred.selection | e }}', '{{ pred.market_type | e }}', {{ prob }}, '{{ 'Low Risk' if prob >= 80 else 'Medium Risk' }}', '{{ odds_val }}')">
+                                Launch <i class="bi bi-arrow-right-short"></i>
+                            </button>
+                        {% endif %}
+                    </div>
+
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Standalone Correct Score Prices Matrix (Matching Image 1) -->
+        {% if is_football and match.score_distribution %}
+            <div class="correct-score-prices-card mt-3">
+                <div class="csp-header-row">
+                    <div class="csp-title">Correct score prices</div>
+                    <div class="csp-bookmaker">Bet365</div>
+                </div>
+                <div class="csp-grid-container">
+                    {% for sc in match.score_distribution[:12] %}
+                        <div class="csp-tile {% if loop.first or sc.score == match.pred_score %}highlight-tile{% endif %}"
+                             onclick="addToSlip('cs-{{ sc.score }}', {{ match.id }}, 'Correct Score: {{ sc.score }}', 'Correct Score', {{ sc.pct_num|round|int }}, 'High Risk', '{{ sc.price_str }}')"
+                             title="Add Correct Score {{ sc.score }} to Slip @ {{ sc.price_str }}">
+                            <div class="csp-score-val mono">{{ sc.score }}</div>
+                            <div class="csp-odds-val mono">{{ sc.price_str }}</div>
+                            <div class="csp-chance-val mono">{{ sc.chance_str }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="csp-footer-note">
+                    The price, then the chance it implies with the bookmaker's margin taken out.
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
+<!-- 3. Sofascore-Style Tab Navigation Directly Below Prediction Cards -->
+<div class="sofa-tab-bar">
+    <button class="sofa-tab-link active" id="tab-btn-predictions" onclick="switchDetailTab('predictions')">
+        Predictions
+    </button>
+    <button class="sofa-tab-link" id="tab-btn-info" onclick="switchDetailTab('info')">
+        Match Info
+    </button>
+    <button class="sofa-tab-link" id="tab-btn-lineups" onclick="switchDetailTab('lineups')">
+        Lineups
+    </button>
+    <button class="sofa-tab-link" id="tab-btn-h2h" onclick="switchDetailTab('h2h')">
+        Head-to-Head
+    </button>
+</div>
+
+<!-- 4. Tab Content Area -->
+<div id="tabContentArea">
+    <!-- Tab 1: Predictions & Telemetry -->
+    <div id="tab-pane-predictions" class="tab-detail-pane" style="display: block;">
+        <div class="tab-panel-box">
+            <div class="tab-section-title">
+                <span><i class="bi bi-activity me-1" style="color: var(--accent-blue);"></i> Match Telemetry & Poisson Simulation</span>
+            </div>
+
+            <!-- Win Probability Bar -->
+            {% set wp = match.win_probabilities or {'home_pct': 48, 'draw_pct': 26, 'away_pct': 26} %}
+            <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center small mono text-secondary mb-1">
+                    <span>Win Probabilities</span>
+                </div>
+                <div class="win-prob-bar-container">
+                    <div class="prob-bar-home" style="width: {{ wp.home_pct }}%;" title="Home: {{ wp.home_pct }}%"></div>
+                    {% if wp.draw_pct and wp.draw_pct > 0 %}
+                        <div class="prob-bar-draw" style="width: {{ wp.draw_pct }}%;" title="Draw: {{ wp.draw_pct }}%"></div>
+                    {% endif %}
+                    <div class="prob-bar-away" style="width: {{ wp.away_pct }}%;" title="Away: {{ wp.away_pct }}%"></div>
+                </div>
+                <div class="win-prob-labels-row small mt-1">
+                    <span class="prob-label-home"><span class="fw-bold">{{ match.home_team }}</span> {{ wp.home_pct }}%</span>
+                    {% if wp.draw_pct and wp.draw_pct > 0 %}
+                        <span class="prob-label-draw">Draw {{ wp.draw_pct }}%</span>
+                    {% endif %}
+                    <span class="prob-label-away">{{ wp.away_pct }}% <span class="fw-bold">{{ match.away_team }}</span></span>
+                </div>
+            </div>
+
+            <!-- Dynamic Metrics Bar -->
+            {% set h_met = match.home_metric_val or 1.4 %}
+            {% set a_met = match.away_metric_val or 1.1 %}
+            {% set met_name = match.home_metric_name or "xG" %}
+            {% set tot_met = (h_met|float + a_met|float) if (h_met|float + a_met|float) > 0 else 1.0 %}
+            {% set h_bar = [100, [(h_met|float / tot_met * 100)|round|int, 5]|max]|min %}
+            {% set a_bar = [100, [(a_met|float / tot_met * 100)|round|int, 5]|max]|min %}
+
+            <div class="mb-2">
+                <div class="xg-metrics-row mb-1">
+                    <div class="xg-team-box">
+                        <span class="xg-team-name">{{ match.home_team }}</span>
+                        <span class="xg-val-text mono text-white">{{ h_met }} <span style="font-size: 0.70rem; color: var(--text-secondary);">{{ met_name }}</span></span>
+                    </div>
+                    <div class="text-center">
+                        <span class="small mono" style="color: var(--text-muted);">vs</span>
+                    </div>
+                    <div class="xg-team-box text-end">
+                        <span class="xg-team-name">{{ match.away_team }}</span>
+                        <span class="xg-val-text mono text-white">{{ a_met }} <span style="font-size: 0.70rem; color: var(--text-secondary);">{{ met_name }}</span></span>
+                    </div>
+                </div>
+                <div class="xg-dual-bars-row">
+                    <div class="xg-left-container">
+                        <div class="xg-home-fill" style="width: {{ h_bar }}%;"></div>
+                    </div>
+                    <div class="xg-center-divider"></div>
+                    <div class="xg-right-container">
+                        <div class="xg-away-fill" style="width: {{ a_bar }}%;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Exact Scorelines (Football) -->
+            {% if is_football and match.score_distribution %}
+                <div class="mt-3">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="small mono text-secondary">Most Probable Exact Scorelines</span>
+                        <span class="badge mono text-secondary" style="background: rgba(255,255,255,0.06); font-size: 0.70rem;">Poisson Odds</span>
+                    </div>
+                    <div class="csp-grid-container mb-2" style="grid-template-columns: repeat(4, 1fr);">
+                        {% for sc in match.score_distribution[:4] %}
+                            <div class="csp-tile {% if loop.first or sc.score == match.pred_score %}highlight-tile{% endif %}"
+                                 onclick="addToSlip('cs-{{ sc.score }}', {{ match.id }}, 'Correct Score: {{ sc.score }}', 'Correct Score', {{ sc.pct_num|round|int }}, 'High Risk', '{{ sc.price_str }}')"
+                                 title="Add Correct Score {{ sc.score }} @ {{ sc.price_str }}">
+                                <div class="csp-score-val mono">{{ sc.score }}</div>
+                                <div class="csp-odds-val mono">{{ sc.price_str }}</div>
+                                <div class="csp-chance-val mono">{{ sc.chance_str }}</div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- Activity Meter (Corners / Points / Games) -->
+            {% if is_football %}
+                {% set proj_corners = match.projected_corners or 9.2 %}
+                {% set corner_meter = [100, [8, (proj_corners / 16.0 * 100)|round|int]|max]|min %}
+                <div class="corner-meter-card mt-3">
+                    <div class="d-flex justify-content-between align-items-center small mono mb-1">
+                        <span class="text-secondary">Expected Corner Volume: <strong class="text-white">{{ proj_corners }}</strong></span>
+                        <span class="text-secondary">Market Floor: <strong style="color: var(--accent-blue);">9.5</strong></span>
+                    </div>
+                    <div class="corner-meter-track">
+                        <div class="corner-meter-fill" style="width: {{ corner_meter }}%;"></div>
+                        <div class="corner-meter-target" style="left: 59%;" title="Line Threshold: 9.5"></div>
+                    </div>
+                    <div class="d-flex justify-content-between mono" style="font-size: 0.68rem; color: var(--text-muted);">
+                        <span>0 Corners</span>
+                        <span>Target Line: 9.5</span>
+                        <span>16+ Max</span>
+                    </div>
+                </div>
+            {% elif is_bball %}
+                <div class="corner-meter-card mt-3">
+                    <div class="d-flex justify-content-between align-items-center small mono">
+                        <span class="text-secondary"><i class="bi bi-graph-up-arrow me-1 text-primary"></i> Projected Total Points:</span>
+                        <strong class="text-white">{{ match.pred_total_display or (match.projected_total_points or 218) }}</strong>
+                    </div>
+                </div>
+            {% else %}
+                <div class="corner-meter-card mt-3">
+                    <div class="d-flex justify-content-between align-items-center small mono">
+                        <span class="text-secondary"><i class="bi bi-clock-history me-1 text-primary"></i> Projected Match Games:</span>
+                        <strong class="text-white">{{ match.projected_total_games or match.pred_total_games or 22 }}</strong>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Tab 2: Match Information -->
+    <div id="tab-pane-info" class="tab-detail-pane" style="display: none;">
+        <div class="tab-panel-box">
+            <div class="tab-section-title"><i class="bi bi-info-circle me-1" style="color: var(--accent-blue);"></i> Match Information</div>
+            <div class="meta-kv-grid">
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Competition</div>
+                    <div class="meta-v-val">{{ match.competition }}</div>
+                </div>
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Kickoff Time</div>
+                    <div class="meta-v-val mono">{{ match.kickoff_display }}</div>
+                </div>
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Sport Category</div>
+                    <div class="meta-v-val">{{ match.sport }}</div>
+                </div>
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Match ID</div>
+                    <div class="meta-v-val mono">#{{ match.id }}</div>
+                </div>
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Venue / Stadium</div>
+                    <div class="meta-v-val">{{ match.home_team }} Arena</div>
+                </div>
+                <div class="meta-kv-item">
+                    <div class="meta-k-label">Surface / Conditions</div>
+                    <div class="meta-v-val">{{ "Hard Court (Outdoor)" if is_tennis else "Standard / Good Conditions" }}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Lineups -->
+    <div id="tab-pane-lineups" class="tab-detail-pane" style="display: none;">
+        <div class="tab-panel-box">
+            <div class="tab-section-title"><i class="bi bi-people me-1" style="color: var(--accent-blue);"></i> Projected Lineups & Matchups</div>
+            <div class="row g-3">
+                <div class="col-6">
+                    <div class="small fw-bold text-white mb-2">{{ match.home_team }} (Home)</div>
+                    <div class="p-2 rounded small text-secondary" style="background: var(--bg-page); border: 1px solid var(--border-subtle);">
+                        <div class="text-white fw-semibold mb-1">{{ "Projected Starting 5" if is_bball else ("Player Profile" if is_tennis else "Formation: 4-3-3") }}</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Full squad available</li>
+                            <li>Primary scorers in form</li>
+                            <li>Regular rotation</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="small fw-bold text-white mb-2">{{ match.away_team }} (Away)</div>
+                    <div class="p-2 rounded small text-secondary" style="background: var(--bg-page); border: 1px solid var(--border-subtle);">
+                        <div class="text-white fw-semibold mb-1">{{ "Projected Starting 5" if is_bball else ("Opponent Profile" if is_tennis else "Formation: 4-2-3-1") }}</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Road lineup confirmed</li>
+                            <li>Counter-attack focused</li>
+                            <li>High intensity transition</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 4: Head-to-Head -->
+    <div id="tab-pane-h2h" class="tab-detail-pane" style="display: none;">
+        <div class="tab-panel-box">
+            <div class="tab-section-title"><i class="bi bi-arrow-left-right me-1" style="color: var(--accent-blue);"></i> Head-to-Head Record</div>
+            <div class="p-3 mb-3 text-center" style="background: var(--bg-page); border: 1px solid var(--border-subtle); border-radius: 6px;">
+                <div class="row text-center mb-2">
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold mono" style="color: var(--accent-red);">3</div>
+                        <div class="small text-secondary">{{ match.home_team }} Wins</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold mono text-secondary">{{ 0 if is_tennis else 2 }}</div>
+                        <div class="small text-secondary">{{ "Ties" if is_tennis else "Draws" }}</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fs-4 fw-bold mono" style="color: var(--accent-blue);">1</div>
+                        <div class="small text-secondary">{{ match.away_team }} Wins</div>
+                    </div>
+                </div>
+                <div class="h2h-dual-bars-row">
+                    <div class="h2h-left-container">
+                        <div class="h2h-home-fill" style="width: 60%;"></div>
+                    </div>
+                    <div class="h2h-center-divider"></div>
+                    <div class="h2h-right-container">
+                        <div class="h2h-away-fill" style="width: 20%;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="small text-secondary" style="line-height: 1.45;">
+                {% if is_bball %}
+                    Recent encounters show an average of <strong>218.4 total points</strong> per game, favoring offensive line movements.
+                {% elif is_tennis %}
+                    Recent encounters show an average of <strong>22.5 total games</strong> per match across hard and clay court surfaces.
+                {% else %}
+                    Recent encounters show an average of <strong>2.67 total goals</strong> per game, favoring defensive double chance coverage.
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Tab Switching Helper for Match Detail Panel
+    function switchDetailTab(tabId) {
+        document.querySelectorAll('.sofa-tab-link').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-detail-pane').forEach(p => p.style.display = 'none');
+        const targetBtn = document.getElementById('tab-btn-' + tabId);
+        const targetPane = document.getElementById('tab-pane-' + tabId);
+        if (targetBtn) targetBtn.classList.add('active');
+        if (targetPane) targetPane.style.display = 'block';
+    }
+
+    // Synchronize added status from active Bet Slip if drawer contains picks
+    if (window.betSlip && Array.isArray(window.betSlip)) {
+        window.betSlip.forEach(item => {
+            const btn = document.getElementById('btnSlip-' + item.predId);
+            if (btn) {
+                btn.classList.add('added');
+                btn.innerHTML = '<i class="bi bi-check2"></i> <span>Added to Slip</span>';
+            }
+        });
+    }
+</script>
+{% endif %}

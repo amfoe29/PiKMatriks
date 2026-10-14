@@ -1,0 +1,215 @@
+<div class="search-results-list" role="listbox" id="searchResultsList" aria-label="Search Results">
+    {% if not query %}
+        <!-- Default State: Search Prompt & Quick Indexes -->
+        <div class="p-4 select-none">
+            <div class="flex items-center gap-2 mb-2 px-1">
+                <svg class="w-3.5 h-3.5 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <span class="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold">Telemetry Index Ready</span>
+            </div>
+            <p class="text-xs font-sans text-zinc-400 mb-3 px-1">
+                Type to query teams, players, and live fixtures across top leagues.
+            </p>
+            <div class="flex flex-wrap gap-1.5 px-1">
+                <button type="button" onclick="setSearchQuery('Arsenal');" class="text-[11px] font-mono text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white border border-zinc-800 rounded px-2.5 py-1 transition-colors">
+                    Arsenal
+                </button>
+                <button type="button" onclick="setSearchQuery('Liverpool');" class="text-[11px] font-mono text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white border border-zinc-800 rounded px-2.5 py-1 transition-colors">
+                    Liverpool
+                </button>
+                <button type="button" onclick="setSearchQuery('Premier League');" class="text-[11px] font-mono text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white border border-zinc-800 rounded px-2.5 py-1 transition-colors">
+                    Premier League
+                </button>
+                <button type="button" onclick="setSearchQuery('Champions League');" class="text-[11px] font-mono text-zinc-300 bg-zinc-900 hover:bg-zinc-800 hover:text-white border border-zinc-800 rounded px-2.5 py-1 transition-colors">
+                    Champions League
+                </button>
+            </div>
+        </div>
+
+    {% elif total_count == 0 %}
+        <!-- Empty Results State (Strict Anti-Slop, zero emojis) -->
+        <div class="p-6 text-center select-none">
+            <div class="w-10 h-10 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center mx-auto mb-2.5">
+                <svg class="w-5 h-5 text-zinc-500" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    <line x1="8" y1="11" x2="14" y2="11"></line>
+                </svg>
+            </div>
+            <div class="text-xs font-mono font-medium uppercase tracking-wider text-zinc-300 mb-1">
+                No Telemetry Found
+            </div>
+            <p class="text-[11px] font-sans text-zinc-400 max-w-xs mx-auto">
+                No indexed clubs or fixtures matched <span class="font-mono text-zinc-300 font-semibold">"{{ query }}"</span>. Try refining your term.
+            </p>
+        </div>
+
+    {% else %}
+        <!-- Entity Results Section -->
+        {% if entities %}
+            <div class="search-category-group py-1.5">
+                <div class="flex items-center justify-between px-3.5 py-1 text-[10px] font-mono uppercase tracking-wider text-zinc-400 select-none">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                        </svg>
+                        Teams & Competitors
+                    </span>
+                    <span class="text-zinc-500 font-mono">{{ entities | length }}</span>
+                </div>
+
+                <div class="px-1.5 py-1 space-y-0.5">
+                    {% for entity in entities %}
+                        {% set e_init = entity.name[:2] | upper %}
+                        <a href="/matches?q={{ entity.name }}"
+                           hx-get="/matches?q={{ entity.name }}"
+                           hx-target="#app-content"
+                           hx-push-url="true"
+                           onclick="closeSearchDropdown();"
+                           role="option"
+                           tabindex="-1"
+                           id="searchOption-entity-{{ loop.index }}"
+                           aria-selected="false"
+                           class="search-result-item group flex items-center justify-between px-3 py-2 rounded-lg border border-transparent bg-transparent text-zinc-300 hover:bg-zinc-800/80 hover:border-zinc-700/60 hover:text-white focus:outline-none focus:bg-zinc-800 focus:border-zinc-700 focus:text-white focus:ring-1 focus:ring-emerald-500/40 active:bg-zinc-800/90 active:scale-[0.995] disabled:opacity-40 disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:border-rose-500/40 data-[error=true]:bg-rose-950/20 data-[error=true]:text-rose-300 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-zinc-700 aria-selected:ring-1 aria-selected:ring-emerald-500/40 transition-all duration-150 no-underline cursor-pointer select-none">
+                            
+                            <!-- Left: Crest / Avatar & Entity Name -->
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <span class="w-6 h-6 rounded-full bg-zinc-800 border border-zinc-700/60 overflow-hidden flex items-center justify-center shrink-0">
+                                    {% if entity.logo_url %}
+                                        <img src="{{ entity.logo_url }}" alt="{{ entity.name }}" class="w-full h-full object-contain p-0.5" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                                        <span class="text-[9px] font-mono font-bold text-zinc-300" style="display:none;">{{ e_init }}</span>
+                                    {% else %}
+                                        <span class="text-[9px] font-mono font-bold text-zinc-300">{{ e_init }}</span>
+                                    {% endif %}
+                                </span>
+                                <div class="min-w-0">
+                                    <div class="text-xs sm:text-sm font-sans font-medium text-zinc-200 group-hover:text-white truncate">
+                                        {{ entity.name }}
+                                    </div>
+                                    <div class="text-[10px] font-mono text-zinc-400">
+                                        {{ entity.sport.name if entity.sport else 'Sports' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right: Telemetry Metrics & Chevron -->
+                            <div class="flex items-center gap-2 shrink-0">
+                                {% if entity.form_string %}
+                                    <span class="font-mono text-[10px] text-zinc-400 tracking-wider bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/40">
+                                        {{ entity.form_string }}
+                                    </span>
+                                {% elif entity.average_xg %}
+                                    <span class="font-mono text-[10px] text-zinc-400 bg-zinc-800/80 px-1.5 py-0.5 rounded border border-zinc-700/40">
+                                        xG {{ entity.average_xg }}
+                                    </span>
+                                {% endif %}
+                                <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 group-focus:text-zinc-300 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if entities and matches %}
+            <div class="border-t border-zinc-800/60 my-1"></div>
+        {% endif %}
+
+        <!-- Match Fixtures Section -->
+        {% if matches %}
+            <div class="search-category-group py-1.5">
+                <div class="flex items-center justify-between px-3.5 py-1 text-[10px] font-mono uppercase tracking-wider text-zinc-400 select-none">
+                    <span class="flex items-center gap-1.5">
+                        <svg class="w-3 h-3 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="16" rx="2"></rect>
+                            <line x1="12" y1="4" x2="12" y2="20"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                        </svg>
+                        Fixtures & Match Telemetry
+                    </span>
+                    <span class="text-zinc-500 font-mono">{{ matches | length }}</span>
+                </div>
+
+                <div class="px-1.5 py-1 space-y-0.5">
+                    {% for match in matches %}
+                        {% set home_name = match.home_entity.name if match.home_entity else 'TBD' %}
+                        {% set away_name = match.away_entity.name if match.away_entity else 'TBD' %}
+                        {% set home_logo = match.home_entity.logo_url if match.home_entity else None %}
+                        {% set away_logo = match.away_entity.logo_url if match.away_entity else None %}
+                        {% set is_live = (match.status.value == 'live') or (match.final_score and match.final_score.get('is_live')) %}
+                        {% set is_ft = (match.status.value == 'finished') or (match.final_score and match.final_score.get('status') == 'FT') %}
+
+                        <a href="/match/{{ match.id }}"
+                           hx-get="/match/{{ match.id }}"
+                           hx-target="#app-content"
+                           hx-push-url="true"
+                           onclick="closeSearchDropdown();"
+                           role="option"
+                           tabindex="-1"
+                           id="searchOption-match-{{ loop.index }}"
+                           aria-selected="false"
+                           class="search-result-item group flex items-center justify-between px-3 py-2.5 rounded-lg border border-transparent bg-transparent text-zinc-300 hover:bg-zinc-800/80 hover:border-zinc-700/60 hover:text-white focus:outline-none focus:bg-zinc-800 focus:border-zinc-700 focus:text-white focus:ring-1 focus:ring-emerald-500/40 active:bg-zinc-800/90 active:scale-[0.995] disabled:opacity-40 disabled:pointer-events-none aria-disabled:opacity-40 aria-disabled:pointer-events-none data-[loading=true]:opacity-60 data-[loading=true]:animate-pulse data-[error=true]:border-rose-500/40 data-[error=true]:bg-rose-950/20 data-[error=true]:text-rose-300 aria-selected:bg-zinc-800 aria-selected:text-white aria-selected:border-zinc-700 aria-selected:ring-1 aria-selected:ring-emerald-500/40 transition-all duration-150 no-underline cursor-pointer select-none">
+                            
+                            <!-- Left: Match Details & Teams -->
+                            <div class="min-w-0 pr-2">
+                                <div class="text-[10px] font-mono text-zinc-400 uppercase tracking-wide truncate mb-1">
+                                    {{ match.competition_name }}
+                                </div>
+                                <div class="flex items-center gap-1.5 text-xs sm:text-sm font-sans font-medium text-zinc-200 group-hover:text-white truncate">
+                                    <!-- Home Crest -->
+                                    <span class="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700/50 overflow-hidden inline-flex items-center justify-center shrink-0">
+                                        {% if home_logo %}
+                                            <img src="{{ home_logo }}" alt="" class="w-full h-full object-contain p-0.5" onerror="this.style.display='none';" />
+                                        {% endif %}
+                                    </span>
+                                    <span>{{ home_name }}</span>
+                                    <span class="text-zinc-500 font-mono text-xs px-0.5">vs</span>
+                                    <!-- Away Crest -->
+                                    <span class="w-4 h-4 rounded-full bg-zinc-800 border border-zinc-700/50 overflow-hidden inline-flex items-center justify-center shrink-0">
+                                        {% if away_logo %}
+                                            <img src="{{ away_logo }}" alt="" class="w-full h-full object-contain p-0.5" onerror="this.style.display='none';" />
+                                        {% endif %}
+                                    </span>
+                                    <span>{{ away_name }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Scores / Timestamps & Prediction Telemetry -->
+                            <div class="flex items-center gap-2.5 shrink-0 text-right">
+                                {% if is_live %}
+                                    <span class="inline-flex items-center gap-1 font-mono text-xs font-bold text-emerald-400 bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-500/30">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        {{ match.final_score.home if match.final_score else 0 }} - {{ match.final_score.away if match.final_score else 0 }}
+                                    </span>
+                                {% elif is_ft %}
+                                    <span class="font-mono text-xs font-semibold text-zinc-300 bg-zinc-800/80 px-2 py-0.5 rounded border border-zinc-700/50">
+                                        {{ match.final_score.home if match.final_score else 0 }} - {{ match.final_score.away if match.final_score else 0 }}
+                                        <span class="text-[10px] text-zinc-500 ml-1">FT</span>
+                                    </span>
+                                {% else %}
+                                    <span class="font-mono text-xs text-zinc-400 bg-zinc-800/60 px-2 py-0.5 rounded border border-zinc-700/40">
+                                        {{ match.kickoff_time.strftime('%b %d, %H:%M') if match.kickoff_time else 'Upcoming' }}
+                                    </span>
+                                {% endif %}
+
+                                {% if match.home_win_prob_baseline %}
+                                    <span class="hidden sm:inline-flex font-mono text-[11px] text-emerald-400/90 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800" title="Baseline Win Probability">
+                                        P(H) {{ (match.home_win_prob_baseline * 100) | round(0) | int }}%
+                                    </span>
+                                {% endif %}
+
+                                <svg class="w-3.5 h-3.5 text-zinc-500 group-hover:text-zinc-300 group-focus:text-zinc-300 shrink-0 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    {% endif %}
+</div>

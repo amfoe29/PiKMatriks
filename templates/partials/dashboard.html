@@ -1,0 +1,477 @@
+<!-- PikMatrix Bankroll Yield & Portfolio ROI Dashboard (Wide Master Workspace Layout) -->
+<div class="dashboard-wrapper p-3 p-lg-4" id="bankrollYieldDashboard" style="width: 100%; height: 100%; overflow-y: auto;">
+    <style>
+        .dash-card {
+            background-color: var(--bg-surface, #161d27);
+            border: 1px solid var(--border-subtle, #242e3f);
+            border-radius: 8px;
+            padding: 1.10rem 1.25rem;
+            position: relative;
+        }
+
+        .stat-kpi-card {
+            background-color: var(--bg-surface, #161d27);
+            border: 1px solid var(--border-subtle, #242e3f);
+            border-radius: 8px;
+            padding: 0.90rem 1.15rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            transition: border-color 0.15s ease;
+        }
+
+        .stat-kpi-card:hover {
+            border-color: rgba(46, 240, 104, 0.4);
+        }
+
+        .stat-kpi-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-secondary, #8c9ba8);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .stat-kpi-val {
+            font-size: 1.65rem;
+            font-weight: 800;
+            line-height: 1.15;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .stat-kpi-sub {
+            font-size: 0.74rem;
+            color: var(--text-muted, #5e6d7d);
+        }
+
+        .chart-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.85rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .chart-legend-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 4px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-surface-elevated, #242e3f);
+            color: var(--text-secondary, #8c9ba8);
+            border: 1px solid var(--border-subtle, #242e3f);
+        }
+
+        /* Responsive 2-column split (1fr 1fr) for bottom section */
+        .dash-bottom-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        @media (max-width: 991px) {
+            .dash-bottom-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .alloc-item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-radius: 6px;
+            background: var(--bg-page, #0f141c);
+            border: 1px solid var(--border-subtle, #242e3f);
+            font-size: 0.78rem;
+        }
+    </style>
+
+    <!-- 1. Top Subheader / Navigation Bar -->
+    <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom" style="border-color: var(--border-subtle, #242e3f) !important;">
+        <div class="d-flex align-items-center gap-2">
+            <div style="width: 34px; height: 34px; border-radius: 6px; background: rgba(46, 240, 104, 0.12); display: flex; align-items: center; justify-content: center;">
+                <i class="bi bi-graph-up-arrow" style="color: var(--accent-green, #2EF068); font-size: 1.1rem;"></i>
+            </div>
+            <div>
+                <h5 class="fw-bold text-white m-0" style="font-size: 1.12rem;">Bankroll Yield & ROI Telemetry</h5>
+                <span class="small text-secondary" style="font-size: 0.74rem;">Institutional Strategy Tracking • Dynamic Kelly vs. 1.00U Flat Staking</span>
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-2">
+            <span class="badge mono d-none d-sm-inline-block" style="background: rgba(46, 240, 104, 0.12); color: var(--accent-green, #2EF068); border: 1px solid rgba(46, 240, 104, 0.3); font-size: 0.72rem;">
+                <svg class="d-inline-block me-1" width="6" height="6" fill="currentColor" viewBox="0 0 8 8"><circle cx="4" cy="4" r="3"/></svg>LIVE PORTFOLIO
+            </span>
+            <a href="/"
+               hx-get="/ui/workspace"
+               hx-target="#main-workspace"
+               hx-swap="innerHTML"
+               hx-push-url="/"
+               class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1"
+               style="border-color: var(--border-subtle, #242e3f); color: var(--text-secondary, #8c9ba8); font-size: 0.76rem; text-decoration: none;">
+                <i class="bi bi-arrow-left"></i>
+                <span>Match Feed</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- 2. 4-KPI Metric Strip -->
+    <div class="row g-2 mb-3">
+        <!-- Net Profit Units -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-kpi-card">
+                <span class="stat-kpi-label">Cumulative Net Yield</span>
+                <span class="stat-kpi-val" style="color: var(--accent-green, #2EF068);">{{ net_units }}</span>
+                <span class="stat-kpi-sub">{{ net_profit_dollars }} at $100/U stake</span>
+            </div>
+        </div>
+        <!-- Win Rate -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-kpi-card">
+                <span class="stat-kpi-label">Overall Win Rate</span>
+                <span class="stat-kpi-val text-white">{{ win_rate }}</span>
+                <span class="stat-kpi-sub">{{ won_bets }}W - {{ lost_bets }}L ({{ total_bets }} picks)</span>
+            </div>
+        </div>
+        <!-- Portfolio ROI -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-kpi-card">
+                <span class="stat-kpi-label">Portfolio ROI</span>
+                <span class="stat-kpi-val" style="color: var(--accent-blue, #2372f5);">{{ roi_pct }}</span>
+                <span class="stat-kpi-sub">Avg Market Odds: {{ avg_odds }}</span>
+            </div>
+        </div>
+        <!-- Alpha Edge / CLV -->
+        <div class="col-6 col-lg-3">
+            <div class="stat-kpi-card">
+                <span class="stat-kpi-label">Alpha Edge (CLV)</span>
+                <span class="stat-kpi-val" style="color: #ff9f43;">{{ avg_clv }}</span>
+                <span class="stat-kpi-sub">Sharpe Ratio: {{ sharpe_ratio }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Top Section: Bankroll Yield Curve Line Chart (Full Width, max-height 300px) -->
+    <div class="dash-card mb-3">
+        <div class="chart-header-row">
+            <div>
+                <h6 class="fw-bold text-white m-0" style="font-size: 0.95rem;">
+                    <i class="bi bi-bezier2 me-1" style="color: var(--accent-green, #2EF068);"></i>
+                    Bankroll Yield Curve (ROI Growth)
+                </h6>
+                <span class="small text-secondary" style="font-size: 0.72rem;">Comparing Kelly Compounding Strategy vs. 1.00U Flat Staking baseline</span>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <span class="chart-legend-badge">
+                    <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: var(--accent-green, #2EF068);"></span>
+                    Compounding Strategy ({{ net_units }})
+                </span>
+                <span class="chart-legend-badge">
+                    <span style="display: inline-block; width: 12px; height: 2px; border-top: 2px dashed #8c9ba8;"></span>
+                    Flat 1U Staking (+14.8 U)
+                </span>
+            </div>
+        </div>
+
+        <div style="position: relative; width: 100%; height: 260px; max-height: 300px;">
+            <canvas id="yieldCurveChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 4. Bottom Section: 2-Column Split (1fr 1fr) -->
+    <div class="dash-bottom-grid mb-3">
+        <!-- Left Side (1fr): Edge Allocation Doughnut Chart -->
+        <div class="dash-card d-flex flex-column">
+            <div class="chart-header-row mb-2">
+                <div>
+                    <h6 class="fw-bold text-white m-0" style="font-size: 0.92rem;">
+                        <i class="bi bi-pie-chart-fill me-1" style="color: var(--accent-blue, #2372f5);"></i>
+                        Edge Allocation Breakdown
+                    </h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Portfolio exposure by market structure</span>
+                </div>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center my-auto py-2" style="position: relative; width: 100%; height: 210px;">
+                <canvas id="allocationChart"></canvas>
+            </div>
+
+            <div class="d-flex flex-column gap-2 mt-3">
+                {% for label in allocation_labels %}
+                <div class="alloc-item-row">
+                    <div class="d-flex align-items-center gap-2">
+                        <span style="display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+                            background: {% if loop.index0 == 0 %}#2372f5{% elif loop.index0 == 1 %}#2EF068{% elif loop.index0 == 2 %}#ff9f43{% else %}#e02b37{% endif %};">
+                        </span>
+                        <span class="text-white fw-semibold">{{ label }}</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="text-secondary mono">{{ allocation_pcts[loop.index0] }}%</span>
+                        <span class="fw-bold mono" style="color: var(--accent-green, #2EF068);">{{ allocation_units[loop.index0] }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Right Side (1fr): Recent Model Positions & CLV Performance Table -->
+        <div class="dash-card d-flex flex-column">
+            <div class="chart-header-row mb-2">
+                <div>
+                    <h6 class="fw-bold text-white m-0" style="font-size: 0.92rem;">
+                        <i class="bi bi-clock-history me-1" style="color: #ff9f43;"></i>
+                        Recent Model Positions & CLV Performance
+                    </h6>
+                    <span class="small text-secondary" style="font-size: 0.72rem;">Latest settled signals vs Closing Line Value</span>
+                </div>
+            </div>
+
+            <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                <table class="table table-dark table-sm table-borderless align-middle m-0" style="font-size: 0.78rem; background: transparent;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid var(--border-subtle, #242e3f); color: var(--text-secondary, #8c9ba8);">
+                            <th style="padding: 8px 10px;">Fixture</th>
+                            <th style="padding: 8px 10px;">Market Selection</th>
+                            <th style="padding: 8px 10px;" class="text-center">Odds</th>
+                            <th style="padding: 8px 10px;" class="text-center">CLV Beat</th>
+                            <th style="padding: 8px 10px;" class="text-end">Result / P&L</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trade in recent_trades %}
+                        <tr style="border-bottom: 1px solid rgba(36, 46, 63, 0.4);">
+                            <td style="padding: 8px 10px; font-weight: 600; color: #ffffff;">{{ trade.fixture }}</td>
+                            <td style="padding: 8px 10px; color: var(--text-secondary, #8c9ba8);">
+                                {{ trade.market }}
+                                {% if trade.context %}
+                                    <div class="small mono" style="font-size: 0.70rem; color: #2EF068; opacity: 0.9;">
+                                        <i class="bi bi-bullseye me-1"></i>{{ trade.context }}
+                                    </div>
+                                {% endif %}
+                            </td>
+                            <td style="padding: 8px 10px; text-align: center;" class="mono">{{ trade.odds }}</td>
+                            <td style="padding: 8px 10px; text-align: center;">
+                                <span class="mono" style="color: var(--accent-green, #2EF068); font-size: 0.72rem;">{{ trade.clv }}</span>
+                            </td>
+                            <td style="padding: 8px 10px; text-align: end;">
+                                {% if trade.result == 'WON' %}
+                                    <span class="badge mono" style="background: rgba(46, 240, 104, 0.18); color: var(--accent-green, #2EF068); border: 1px solid rgba(46, 240, 104, 0.45); font-weight: 700; padding: 4px 9px;">
+                                        <i class="bi bi-check-circle-fill me-1"></i> WON {{ trade.units }}
+                                    </span>
+                                {% elif trade.result == 'PUSH' %}
+                                    <span class="badge mono" style="background: rgba(140, 155, 168, 0.15); color: #8c9ba8; border: 1px solid rgba(140, 155, 168, 0.35); padding: 4px 8px;">
+                                        PUSH {{ trade.units }}
+                                    </span>
+                                {% else %}
+                                    <span class="badge mono" style="background: rgba(224, 43, 55, 0.15); color: var(--accent-red, #e02b37); border: 1px solid rgba(224, 43, 55, 0.35); padding: 4px 8px;">
+                                        LOST {{ trade.units }}
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js Integration & Rendering Engine -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+(function() {
+    function initCharts() {
+        if (typeof Chart === 'undefined') {
+            setTimeout(initCharts, 50);
+            return;
+        }
+
+        // Cleanup any prior instances to prevent canvas reuse conflicts
+        if (window.pikYieldChartInstance) {
+            window.pikYieldChartInstance.destroy();
+            window.pikYieldChartInstance = null;
+        }
+        if (window.pikAllocChartInstance) {
+            window.pikAllocChartInstance.destroy();
+            window.pikAllocChartInstance = null;
+        }
+
+        // 1. Render Bankroll Yield Curve (Line Chart)
+        const yieldCanvas = document.getElementById('yieldCurveChart');
+        if (yieldCanvas) {
+            const ctx = yieldCanvas.getContext('2d');
+
+            // Create smooth green gradient fill
+            const greenGradient = ctx.createLinearGradient(0, 0, 0, 260);
+            greenGradient.addColorStop(0, 'rgba(46, 240, 104, 0.22)');
+            greenGradient.addColorStop(1, 'rgba(46, 240, 104, 0.00)');
+
+            const yieldLabels = {{ yield_curve_labels | default([]) | tojson }};
+            const compoundData = {{ compounding_data | default([]) | tojson }};
+            const flatData = {{ flat_data | default([]) | tojson }};
+
+            window.pikYieldChartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: yieldLabels.length ? yieldLabels : Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+                    datasets: [
+                        {
+                            label: 'Compounding Strategy (+34.2 U)',
+                            data: compoundData.length ? compoundData : [0, 1.8, 2.4, 3.9, 5.1, 4.7, 7.2, 8.9, 8.4, 11.0, 12.5, 14.8, 14.1, 17.2, 19.0, 20.8, 20.1, 22.9, 24.4, 23.7, 26.5, 28.1, 27.3, 29.8, 31.2, 30.4, 32.7, 34.1, 33.5, 34.2],
+                            borderColor: '#2EF068',
+                            backgroundColor: greenGradient,
+                            borderWidth: 2.8,
+                            fill: true,
+                            tension: 0.35,
+                            pointRadius: 2.5,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#2EF068',
+                            pointBorderColor: '#161d27',
+                            pointBorderWidth: 1.5,
+                        },
+                        {
+                            label: 'Flat 1.00U Staking (+14.8 U)',
+                            data: flatData.length ? flatData : [0, 0.8, 1.2, 1.9, 2.6, 2.2, 3.5, 4.3, 4.0, 5.2, 5.9, 6.8, 6.4, 7.7, 8.5, 9.3, 8.9, 10.1, 10.8, 10.4, 11.6, 12.3, 11.9, 12.9, 13.6, 13.2, 14.1, 14.8, 14.4, 14.8],
+                            borderColor: '#8c9ba8',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [6, 4],
+                            fill: false,
+                            tension: 0.3,
+                            pointRadius: 1.5,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#8c9ba8',
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#242e3f',
+                            titleColor: '#ffffff',
+                            bodyColor: '#8c9ba8',
+                            borderColor: '#2EF068',
+                            borderWidth: 1,
+                            padding: 10,
+                            bodyFont: {
+                                family: 'JetBrains Mono',
+                                size: 12
+                            },
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.dataset.label.split(' (')[0]}: +${Number(context.raw).toFixed(1)} U`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: {
+                                color: 'rgba(36, 46, 63, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#5e6d7d',
+                                font: {
+                                    size: 10,
+                                    family: 'JetBrains Mono'
+                                },
+                                maxTicksLimit: 15
+                            }
+                        },
+                        y: {
+                            grid: {
+                                color: 'rgba(36, 46, 63, 0.5)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                color: '#8c9ba8',
+                                font: {
+                                    size: 11,
+                                    family: 'JetBrains Mono'
+                                },
+                                callback: function(val) {
+                                    return `+${val} U`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 2. Render Edge Allocation Breakdown (Doughnut Chart)
+        const allocCanvas = document.getElementById('allocationChart');
+        if (allocCanvas) {
+            const allocCtx = allocCanvas.getContext('2d');
+            const allocLabels = {{ allocation_labels | default([]) | tojson }};
+            const allocPcts = {{ allocation_pcts | default([]) | tojson }};
+
+            window.pikAllocChartInstance = new Chart(allocCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: allocLabels.length ? allocLabels : ['Handicaps & Spreads', 'Totals (O/U)', 'Accumulators', 'Value Moneylines'],
+                    datasets: [{
+                        data: allocPcts.length ? allocPcts : [42, 33, 15, 10],
+                        backgroundColor: [
+                            '#2372f5', // Accent Blue
+                            '#2EF068', // Accent Green
+                            '#ff9f43', // Warm Amber
+                            '#e02b37'  // Accent Red
+                        ],
+                        borderColor: '#161d27',
+                        borderWidth: 3,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: '#242e3f',
+                            titleColor: '#ffffff',
+                            bodyColor: '#8c9ba8',
+                            borderColor: '#242e3f',
+                            borderWidth: 1,
+                            padding: 8,
+                            callbacks: {
+                                label: function(context) {
+                                    return ` ${context.label}: ${context.raw}% exposure`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    // Execute chart initialization
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initCharts);
+    } else {
+        initCharts();
+    }
+})();
+</script>

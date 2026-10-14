@@ -1,0 +1,141 @@
+<!-- Sofascore Subheader: Date Toggle Ribbon & Compact Status Tabs -->
+<div class="feed-subheader">
+    <div class="date-ribbon-container">
+        <button class="date-ribbon-arrow" onclick="shiftDateFilter(-1)" title="Previous Day">
+            <i class="bi bi-chevron-left"></i>
+        </button>
+        <div class="date-ribbon-items">
+            <button class="date-ribbon-btn {% if active_date_filter == 'yesterday' %}active{% endif %}" onclick="setDateFilter('yesterday')">Yesterday</button>
+            <button class="date-ribbon-btn {% if active_date_filter == 'today' %}active{% endif %}" onclick="setDateFilter('today')">Today</button>
+            <button class="date-ribbon-btn {% if active_date_filter == 'tomorrow' %}active{% endif %}" onclick="setDateFilter('tomorrow')">Tomorrow</button>
+            <button class="date-ribbon-btn {% if active_date_filter in ('upcoming', 'all') %}active{% endif %}" onclick="setDateFilter('upcoming')">All Upcoming</button>
+        </div>
+        <button class="date-ribbon-arrow" onclick="shiftDateFilter(1)" title="Next Day">
+            <i class="bi bi-chevron-right"></i>
+        </button>
+    </div>
+
+    <div class="status-tabs-container">
+        <div class="d-flex align-items-center gap-1">
+            <button class="status-tab-btn active" id="tab-status-all" onclick="setStatusFilter('all')">All</button>
+            <button class="status-tab-btn" id="tab-status-live" onclick="setStatusFilter('live')">Live</button>
+            <button class="status-tab-btn" id="tab-status-finished" onclick="setStatusFilter('finished')">Finished</button>
+            <button class="status-tab-btn" id="tab-status-upcoming" onclick="setStatusFilter('upcoming')">Upcoming</button>
+        </div>
+        <span class="small text-secondary ms-auto mono" style="font-size: 0.70rem;" id="feedCounterText">
+            {{ matches | length }} Matches
+        </span>
+    </div>
+</div>
+
+<!-- Match Feed Container -->
+<div id="matchFeedContainer">
+    {% if not matches %}
+        <div class="empty-view-box">
+            <i class="bi bi-calendar-x fs-1 text-secondary d-block mb-3"></i>
+            <h6 class="text-white fw-bold mb-2">No matches found.</h6>
+            <p class="small text-secondary mb-3">Try selecting another status, date, or resetting filters.</p>
+            <button class="btn btn-sm text-white px-3 py-1" style="background: var(--accent-blue);" onclick="resetAllFilters()">Reset Filters</button>
+        </div>
+    {% else %}
+        {% for comp_name, comp_matches in matches | groupby('competition') %}
+            <div class="league-group-bar">
+                <div class="league-group-title flex items-center gap-2">
+                    <span class="league-group-icon">
+                        {% if comp_matches[0].competition_flag %}
+                            {{ comp_matches[0].competition_flag }}
+                        {% else %}
+                            <svg class="w-3.5 h-3.5 text-zinc-400 shrink-0 inline-block" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 4h16v6a7 7 0 0 1-14 0V4ZM12 17v4M8 21h8"/>
+                            </svg>
+                        {% endif %}
+                    </span>
+                    <span class="league-group-name">{{ comp_name }}</span>
+                </div>
+                <span class="league-group-count mono">{{ comp_matches | length }}/{{ matches | length }}</span>
+            </div>
+            <div class="league-group-matches">
+                {% for match in comp_matches %}
+                    {% set is_selected = (selected_match and selected_match.id == match.id) %}
+                    {% set is_live = match.is_live or match.status == 'live' %}
+                    {% set is_finished = match.is_finished or match.status == 'finished' %}
+                    {% set home_init = match.home_initials or (match.home_team[:2] | upper) %}
+                    {% set away_init = match.away_initials or (match.away_team[:2] | upper) %}
+                    
+                    <div class="sofa-match-row {% if is_selected %}active-match{% endif %}"
+                         id="matchRow-{{ match.id }}"
+                         hx-get="/ui/match/{{ match.id }}"
+                         hx-target="#match-detail-panel"
+                         hx-swap="innerHTML"
+                         hx-trigger="click"
+                         hx-indicator="#loading-spinner"
+                         onclick="selectMatch({{ match.id }})">
+                         
+                        <!-- 1. Left column: Time or Status -->
+                        <div class="sofa-left-col">
+                            {% if is_live %}
+                                <span class="live-minute mono">{{ match.live_minute or 'LIVE' }}'</span>
+                            {% elif is_finished %}
+                                <span class="ft-text mono">FT</span>
+                            {% else %}
+                                <span class="mono">{{ match.kickoff_time_str or '18:00' }}</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- 2. Middle column: Teams & Scores -->
+                        <div class="sofa-middle-col">
+                            <div class="sofa-team-row">
+                                <div class="sofa-team-info">
+                                    <span class="sofa-team-badge overflow-hidden">
+                                        {% if match.home_logo_url %}
+                                            <img src="{{ match.home_logo_url }}" alt="{{ match.home_team }}" class="w-full h-full object-contain p-0.5" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                                            <span style="display:none;">{{ home_init }}</span>
+                                        {% else %}
+                                            <span>{{ home_init }}</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="sofa-team-name">{{ match.home_team }}</span>
+                                </div>
+                                {% if is_finished and match.home_score is not none %}
+                                    <span class="sofa-score mono">{{ match.home_score }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="sofa-team-row">
+                                <div class="sofa-team-info">
+                                    <span class="sofa-team-badge overflow-hidden">
+                                        {% if match.away_logo_url %}
+                                            <img src="{{ match.away_logo_url }}" alt="{{ match.away_team }}" class="w-full h-full object-contain p-0.5" onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='inline';" />
+                                            <span style="display:none;">{{ away_init }}</span>
+                                        {% else %}
+                                            <span>{{ away_init }}</span>
+                                        {% endif %}
+                                    </span>
+                                    <span class="sofa-team-name">{{ match.away_team }}</span>
+                                </div>
+                                {% if is_finished and match.away_score is not none %}
+                                    <span class="sofa-score mono">{{ match.away_score }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- 3. Right column: Prediction Chip -->
+                        <div class="sofa-right-col">
+                            {% if match.alpha_value_play and match.alpha_value_play.alpha_edge and match.alpha_value_play.alpha_edge >= 5.0 %}
+                                <span class="pred-chip-pill pred-chip-edge mono">+{{ match.alpha_value_play.alpha_edge | round(1) }}% Edge</span>
+                            {% elif match.capital_preservation_play %}
+                                {% set prob = (match.capital_preservation_play.model_prob_pct or (match.capital_preservation_play.confidence_num * 100 if match.capital_preservation_play.confidence_num else (match.capital_preservation_play.confidence_score | float if match.capital_preservation_play.confidence_score else 85))) | round | int %}
+                                <span class="pred-chip-pill pred-chip-lock mono">{{ prob }}% Lock</span>
+                            {% elif match.is_unplayable %}
+                                <span class="pred-chip-pill pred-chip-neutral mono">Volatile</span>
+                            {% elif is_finished %}
+                                <span class="pred-chip-pill pred-chip-neutral mono">FT</span>
+                            {% else %}
+                                <span class="pred-chip-pill pred-chip-neutral mono" style="opacity: 0.6;">-</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    {% endif %}
+</div>

@@ -1,0 +1,280 @@
+<!-- Bivariate Poisson Deep Analytical Prediction Breakdown Drawer -->
+<div class="prediction-drawer-backdrop show" id="predictionDrawerModal" onclick="closePredictionDrawer()">
+    <div class="prediction-drawer-panel" onclick="event.stopPropagation()">
+        
+        <!-- Header -->
+        <div class="d-flex align-items-center justify-content-between pb-3 mb-3 border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+            <div class="d-flex align-items-center gap-2">
+                <div class="brand-icon-box" style="width: 34px; height: 34px; border-radius: 8px; background: linear-gradient(135deg, var(--accent-blue) 0%, #174eb8 100%);">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h6 class="m-0 text-white fw-bold" style="letter-spacing: -0.2px;">Bivariate Poisson Engine</h6>
+                        <span class="badge border mono" style="font-size: 0.65rem; background: rgba(35, 114, 245, 0.15); color: #58a6ff; border-color: rgba(35, 114, 245, 0.3);">
+                            {{ breakdown.ai_confidence_pct }}% AI Conf
+                        </span>
+                    </div>
+                    <span class="small text-secondary" style="font-size: 0.75rem;">
+                        {{ breakdown.home_team }} vs {{ breakdown.away_team }} • {{ breakdown.competition }}
+                    </span>
+                </div>
+            </div>
+            <button class="btn-drawer-close" onclick="closePredictionDrawer()" title="Close breakdown (Esc)">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div class="prediction-drawer-body">
+
+            <!-- 1. Hero Scoreline & Top Likelihood -->
+            <div class="prediction-hero-card mb-3 p-3 text-center rounded" style="background: linear-gradient(180deg, #182232 0%, #121822 100%); border: 1px solid rgba(35, 114, 245, 0.35); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);">
+                <div class="small text-uppercase tracking-wider text-secondary mb-1" style="font-size: 0.68rem; letter-spacing: 0.5px;">
+                    Most Likely Exact Scoreline
+                </div>
+                <div class="display-5 fw-bold mono text-white mb-1" style="letter-spacing: 2px;">
+                    {{ breakdown.most_likely_score }}
+                </div>
+                <div class="d-flex align-items-center justify-content-center gap-2">
+                    <span class="badge rounded-pill bg-dark border border-secondary text-white mono" style="font-size: 0.72rem; padding: 4px 10px;">
+                        <i class="bi bi-bullseye text-primary me-1"></i>{{ breakdown.most_likely_score_pct }} Joint Probability
+                    </span>
+                    <span class="badge rounded-pill text-white mono" style="background: rgba(35, 114, 245, 0.25); border: 1px solid rgba(35, 114, 245, 0.4); font-size: 0.72rem; padding: 4px 10px;">
+                        Exp Total: {{ breakdown.expected_total_goals }} Goals
+                    </span>
+                </div>
+                {% if breakdown.promotion_tax_applied %}
+                <div class="mt-2 text-center">
+                    <span class="badge border" style="background: rgba(245, 158, 11, 0.15); color: #fcd34d; border-color: rgba(245, 158, 11, 0.4); font-size: 0.72rem; padding: 4px 10px;">
+                        <i class="bi bi-arrow-up-right-circle me-1"></i>Historical Data Adjusted for League Promotion
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+
+
+            <!-- 2. 1X2 Match Outcome Probabilities -->
+            <div class="mb-3 p-3 rounded" style="background: #111620; border: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-white text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-pie-chart-fill me-1 text-primary"></i> 1X2 Win Probabilities
+                    </span>
+                    <div class="d-flex gap-2">
+                        <span class="badge mono" style="background: rgba(255,255,255,0.06); font-size: 0.68rem; color: #cbd5e1;">
+                            1X: {{ breakdown.prob_1x_pct }}%
+                        </span>
+                        <span class="badge mono" style="background: rgba(255,255,255,0.06); font-size: 0.68rem; color: #cbd5e1;">
+                            X2: {{ breakdown.prob_x2_pct }}%
+                        </span>
+                    </div>
+                </div>
+
+                <!-- 3-Column Prob Cards -->
+                <div class="row g-2 text-center mb-2">
+                    <div class="col-4">
+                        <div class="p-2 rounded" style="background: rgba(35, 114, 245, 0.1); border: 1px solid rgba(35, 114, 245, 0.25);">
+                            <div class="text-secondary small mb-1 text-truncate" style="font-size: 0.7rem;" title="{{ breakdown.home_team }} (1)">
+                                {{ breakdown.home_team }}
+                            </div>
+                            <div class="fw-bold mono fs-5 text-white">{{ breakdown.home_win_pct }}%</div>
+                            <div class="text-secondary mono" style="font-size: 0.65rem;">Home Win</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded" style="background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);">
+                            <div class="text-secondary small mb-1" style="font-size: 0.7rem;">Draw (X)</div>
+                            <div class="fw-bold mono fs-5 text-white">{{ breakdown.draw_pct }}%</div>
+                            <div class="text-secondary mono" style="font-size: 0.65rem;">Stalemate</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="p-2 rounded" style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.25);">
+                            <div class="text-secondary small mb-1 text-truncate" style="font-size: 0.7rem;" title="{{ breakdown.away_team }} (2)">
+                                {{ breakdown.away_team }}
+                            </div>
+                            <div class="fw-bold mono fs-5 text-white">{{ breakdown.away_win_pct }}%</div>
+                            <div class="text-secondary mono" style="font-size: 0.65rem;">Away Win</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tri-Color Stacked Bar -->
+                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 9999px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: {{ breakdown.home_win_pct }}%;" title="Home: {{ breakdown.home_win_pct }}%"></div>
+                    <div class="progress-bar bg-secondary" role="progressbar" style="width: {{ breakdown.draw_pct }}%; opacity: 0.6;" title="Draw: {{ breakdown.draw_pct }}%"></div>
+                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ breakdown.away_win_pct }}%;" title="Away: {{ breakdown.away_win_pct }}%"></div>
+                </div>
+            </div>
+
+            <!-- 3. Goal Expectancy & Over/Under 2.5 -->
+            <div class="mb-3 p-3 rounded" style="background: #111620; border: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-white text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-speedometer2 me-1 text-success"></i> Goal Expectancy & Totals
+                    </span>
+                    <span class="small mono text-secondary" style="font-size: 0.72rem;">
+                        Home &lambda;: {{ breakdown.lambda_home }} | Away &lambda;: {{ breakdown.lambda_away }}
+                    </span>
+                </div>
+
+                <!-- Over/Under 2.5 Split -->
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <div class="p-2 rounded d-flex justify-content-between align-items-center" style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2);">
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.7rem;">Over 2.5 Goals</div>
+                                <div class="fw-bold mono fs-6 text-white">{{ breakdown.over_25_pct }}%</div>
+                            </div>
+                            <i class="bi bi-arrow-up-right text-success fs-5"></i>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 rounded d-flex justify-content-between align-items-center" style="background: rgba(59, 130, 246, 0.08); border: 1px solid rgba(59, 130, 246, 0.2);">
+                            <div>
+                                <div class="text-secondary" style="font-size: 0.7rem;">Under 2.5 Goals</div>
+                                <div class="fw-bold mono fs-6 text-white">{{ breakdown.under_25_pct }}%</div>
+                            </div>
+                            <i class="bi bi-arrow-down-right text-info fs-5"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.06); border-radius: 9999px;">
+                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ breakdown.over_25_pct }}%;" title="Over 2.5: {{ breakdown.over_25_pct }}%"></div>
+                    <div class="progress-bar bg-info" role="progressbar" style="width: {{ breakdown.under_25_pct }}%;" title="Under 2.5: {{ breakdown.under_25_pct }}%"></div>
+                </div>
+            </div>
+
+            <!-- 4. Ingested Database Telemetry Comparison -->
+            <div class="mb-3 p-3 rounded" style="background: #111620; border: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-white text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-database-check me-1 text-info"></i> Ingested Entity Telemetry
+                    </span>
+                    <span class="badge border mono" style="font-size: 0.65rem; background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1); color: #94a3b8;">
+                        DB Telemetry Inputs
+                    </span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-sm table-dark table-borderless m-0" style="font-size: 0.76rem;">
+                        <thead>
+                            <tr class="text-secondary border-bottom" style="border-color: rgba(255,255,255,0.08) !important;">
+                                <th>Telemetry Metric</th>
+                                <th class="text-center">{{ breakdown.home_team }}</th>
+                                <th class="text-center">{{ breakdown.away_team }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-secondary">Expected Goals For (<code style="color: #60a5fa;">avg_xg_for</code>)</td>
+                                <td class="text-center mono fw-bold text-white">{{ breakdown.home_xg_for }}</td>
+                                <td class="text-center mono fw-bold text-white">{{ breakdown.away_xg_for }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-secondary">Expected Goals Agst (<code style="color: #f87171;">avg_xg_against</code>)</td>
+                                <td class="text-center mono fw-bold text-white">{{ breakdown.home_xg_against }}</td>
+                                <td class="text-center mono fw-bold text-white">{{ breakdown.away_xg_against }}</td>
+                            </tr>
+                            <tr>
+                                <td class="text-secondary">Form Rating (<code style="color: #34d399;">form_rating</code>)</td>
+                                <td class="text-center mono fw-bold text-success">{{ breakdown.home_form_rating }}</td>
+                                <td class="text-center mono fw-bold text-success">{{ breakdown.away_form_rating }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 5. Top 9 Scorelines Probabilities (3x3 Grid) -->
+            <div class="p-3 rounded" style="background: #111620; border: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small fw-bold text-white text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">
+                        <i class="bi bi-grid-3x3 me-1 text-emerald-400"></i> Top 9 Exact Scorelines (3×3)
+                    </span>
+                    <span class="small text-secondary mono" style="font-size: 0.68rem;">Poisson Joint Dist</span>
+                </div>
+
+                <div class="row g-2">
+                    {% for sc in breakdown.top_scores[:9] %}
+                        <div class="col-4">
+                            <div class="p-2 rounded text-center" style="background: rgba(16, 185, 129, {{ sc.heat_opacity or 0.25 }}); border: 1px solid rgba(16, 185, 129, 0.35);">
+                                <div class="fw-bold mono text-white" style="font-size: 0.82rem;">{{ sc.score }}</div>
+                                <div class="mono small fw-bold text-white" style="font-size: 0.74rem; text-shadow: 0 1px 2px rgba(0,0,0,0.6);">
+                                    {{ sc.pct }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <div class="pt-3 mt-3 border-top d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.08) !important;">
+            <span class="small text-secondary mono" style="font-size: 0.7rem;">
+                Calibrated via scipy.stats.poisson • PikMatrix AI
+            </span>
+            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="closePredictionDrawer()">
+                Dismiss
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<style>
+.prediction-drawer-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(5, 8, 14, 0.78);
+    backdrop-filter: blur(8px);
+    z-index: 1200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    animation: predFadeIn 0.18s ease-out;
+}
+.prediction-drawer-backdrop.show {
+    display: flex !important;
+}
+.prediction-drawer-panel {
+    background: #161D27;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 540px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75);
+    max-height: 92vh;
+    overflow-y: auto;
+    animation: predScaleUp 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes predFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+@keyframes predScaleUp {
+    from { transform: scale(0.96); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+</style>
+
+<script>
+function closePredictionDrawer() {
+    const container = document.getElementById('drawer-container');
+    if (container) {
+        container.innerHTML = '';
+    }
+}
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closePredictionDrawer();
+    }
+});
+</script>

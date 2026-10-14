@@ -1,0 +1,67 @@
+/**
+ * PikMatrix Unified Stylesheet Bundle
+ * Integrates Design Tokens, Mobile-First Base, 8-State Components, Layout, and Quantitative Telemetry.
+ */
+
+@import url("./tokens.css");
+@import url("./base.css");
+@import url("./components.css");
+@import url("./layout.css");
+@import url("./terminal.css");
+
+/* Legacy Class Aliases & Seamless Fallbacks */
+.matches-hub-container,
+.match-terminal-container,
+.dashboard-page-container,
+.profile-page-container {
+  width: 100%;
+}
+
+.sofa-sport-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  border-radius: var(--radius-full);
+  border: var(--border-hairline);
+  background-color: var(--surface-sunken);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--motion-fast);
+  text-decoration: none;
+}
+
+.sofa-sport-pill:hover {
+  background-color: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border-strong-color);
+}
+
+.sofa-sport-pill.active,
+.sofa-sport-pill[aria-selected="true"] {
+  background-color: var(--action-accent);
+  color: var(--action-accent-text);
+  border-color: var(--action-accent);
+}
+
+.sofa-date-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+}
+
+.category-pred-card {
+  background-color: var(--surface-card);
+  border: var(--border-hairline);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  transition: border-color var(--motion-fast);
+}
+
+.category-pred-card:hover {
+  border-color: var(--border-strong-color);
+}
